@@ -169,7 +169,7 @@ function Hero() {
               </StarBorder>
               <a
                 href="#how-it-works"
-                className="px-6 py-3.5 rounded-xl border border-[rgba(240,237,230,0.12)] text-[var(--color-cream)] text-base no-underline hover:border-[rgba(240,237,230,0.25)] transition-colors"
+                className="px-6 py-3.5 rounded-xl bg-[rgba(240,237,230,0.08)] backdrop-blur-sm border border-[rgba(240,237,230,0.15)] text-[var(--color-cream)] text-base font-medium no-underline hover:bg-[rgba(240,237,230,0.14)] hover:border-[rgba(240,237,230,0.25)] transition-all"
               >
                 See How It Works
               </a>
@@ -177,24 +177,95 @@ function Hero() {
           </FadeIn>
         </div>
 
-        {/* Terminal Demo */}
+        {/* App UI Mockup */}
         <FadeIn delay={1.4} duration={0.8} blur>
-          <div className="terminal max-w-2xl mx-auto">
-            <div className="terminal-bar">
+          <div className="app-mockup max-w-3xl mx-auto">
+            {/* Browser chrome */}
+            <div className="app-mockup__bar">
               <span className="terminal-dot" style={{ background: '#ff5f57' }} />
               <span className="terminal-dot" style={{ background: '#febc2e' }} />
               <span className="terminal-dot" style={{ background: '#28c840' }} />
+              <span className="app-mockup__url">localhost:8501</span>
             </div>
-            <div className="terminal-body">
-              <div><span className="prompt">$</span> <span className="cmd">evidenceflow --protocol review.json</span></div>
-              <div>Loading protocol... 14 inclusion criteria found</div>
-              <div>Connected to Covidence review</div>
-              <div>Screening batch 1/60... <span className="highlight">100 papers analyzed</span></div>
-              <div>Screening batch 2/60... <span className="highlight">100 papers analyzed</span></div>
-              <div style={{ opacity: 0.4 }}>...</div>
-              <div><span className="highlight">Done. 6,000 papers screened in 58m 14s</span></div>
-              <div>Yes: <span className="highlight">412</span> | No: 5,396 | Maybe: 192</div>
-              <div>Audit log saved to screening_results.json</div>
+            <div className="app-mockup__body">
+              {/* Sidebar */}
+              <div className="app-mockup__sidebar">
+                <div className="app-mockup__sidebar-brand">
+                  <span className="w-5 h-5 rounded bg-[var(--color-teal)] flex items-center justify-center text-[var(--color-navy)] font-bold text-[8px]">EF</span>
+                  <span className="text-[var(--color-cream)] text-xs font-semibold">EvidenceFlow</span>
+                </div>
+                <div className="app-mockup__sidebar-section">
+                  <div className="app-mockup__sidebar-label">License</div>
+                  <div className="app-mockup__sidebar-badge">Pro</div>
+                </div>
+                <div className="app-mockup__sidebar-section">
+                  <div className="app-mockup__sidebar-label">Protocol</div>
+                  <div className="text-[10px] text-[var(--color-cream-muted)]">review_protocol.json</div>
+                </div>
+                <div className="app-mockup__sidebar-section">
+                  <div className="app-mockup__sidebar-label">Papers</div>
+                  <div className="text-[10px] text-[var(--color-cream-muted)]">6,000 total</div>
+                </div>
+                <div className="mt-auto pt-3">
+                  <div className="app-mockup__sidebar-btn">Start Screening</div>
+                </div>
+              </div>
+              {/* Main content */}
+              <div className="app-mockup__main">
+                <div className="text-xs font-semibold text-[var(--color-cream)] mb-2">Screening Progress</div>
+                {/* Progress bar */}
+                <div className="app-mockup__progress">
+                  <div className="app-mockup__progress-fill" style={{ width: '100%' }} />
+                </div>
+                <div className="text-[10px] text-[var(--color-cream-muted)] mb-3">Batch 60/60 complete</div>
+                {/* Metrics row */}
+                <div className="app-mockup__metrics">
+                  <div className="app-mockup__metric">
+                    <div className="app-mockup__metric-value text-[var(--color-teal)]">412</div>
+                    <div className="app-mockup__metric-label">Included</div>
+                  </div>
+                  <div className="app-mockup__metric">
+                    <div className="app-mockup__metric-value">5,396</div>
+                    <div className="app-mockup__metric-label">Excluded</div>
+                  </div>
+                  <div className="app-mockup__metric">
+                    <div className="app-mockup__metric-value" style={{ color: '#FFD166' }}>192</div>
+                    <div className="app-mockup__metric-label">Maybe</div>
+                  </div>
+                  <div className="app-mockup__metric">
+                    <div className="app-mockup__metric-value">58m 14s</div>
+                    <div className="app-mockup__metric-label">Duration</div>
+                  </div>
+                </div>
+                {/* Results preview */}
+                <div className="text-[10px] font-medium text-[var(--color-cream)] mt-3 mb-1.5">Recent Decisions</div>
+                <div className="app-mockup__table">
+                  <div className="app-mockup__row app-mockup__row--header">
+                    <span className="flex-1">Title</span>
+                    <span className="w-14 text-center">Decision</span>
+                  </div>
+                  <div className="app-mockup__row">
+                    <span className="flex-1 truncate">Effects of mindfulness-based intervention on...</span>
+                    <span className="app-mockup__badge app-mockup__badge--yes">Yes</span>
+                  </div>
+                  <div className="app-mockup__row">
+                    <span className="flex-1 truncate">A systematic review of pharmacological...</span>
+                    <span className="app-mockup__badge app-mockup__badge--no">No</span>
+                  </div>
+                  <div className="app-mockup__row">
+                    <span className="flex-1 truncate">Machine learning approaches for predicting...</span>
+                    <span className="app-mockup__badge app-mockup__badge--no">No</span>
+                  </div>
+                  <div className="app-mockup__row">
+                    <span className="flex-1 truncate">Cognitive behavioral therapy outcomes in...</span>
+                    <span className="app-mockup__badge app-mockup__badge--yes">Yes</span>
+                  </div>
+                  <div className="app-mockup__row">
+                    <span className="flex-1 truncate">Cross-sectional analysis of dietary patterns...</span>
+                    <span className="app-mockup__badge app-mockup__badge--maybe">Maybe</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </FadeIn>
@@ -557,8 +628,7 @@ function Pricing() {
                     rel="noopener noreferrer"
                     color="rgba(0, 200, 180, 0.5)"
                     speed="4s"
-                    className="w-full"
-                    style={{ display: 'flex' }}
+                    style={{ display: 'flex', width: '100%', justifyContent: 'center' }}
                   >
                     {tier.cta}
                   </StarBorder>
