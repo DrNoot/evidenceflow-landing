@@ -1,17 +1,1775 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=General+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <meta name="description" content="AI-powered systematic review screening. Screen 10,000 papers in an afternoon with 99.5% sensitivity. PRISMA-compliant audit trails." />
-    <title>EvidenceFlow - AI Systematic Review Screening</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvidenceFlow: AI-Powered Systematic Review Screening</title>
+    <meta name="description" content="Screen thousands of research papers in minutes with AI. Published research shows 99.5% sensitivity. PRISMA-compliant audit trails, Covidence integration. Your tireless second reviewer.">
+    <meta name="theme-color" content="#0B1628">
+    <link rel="icon" type="image/png" href="evidenceflow_icon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================
+           RESET & VARIABLES
+           ============================================ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy: #0B1628;
+            --navy-light: #111E33;
+            --navy-mid: #162540;
+            --teal: #00C8B4;
+            --teal-dim: rgba(0, 200, 180, 0.12);
+            --teal-glow: rgba(0, 200, 180, 0.35);
+            --cream: #F0EDE6;
+            --cream-dim: rgba(240, 237, 230, 0.7);
+            --cream-muted: rgba(240, 237, 230, 0.45);
+            --slate: #8A9BB5;
+            --coral: #FF6B6B;
+            --gold: #FFD166;
+            --purple: #A78BFA;
+
+            --font-display: 'DM Serif Display', Georgia, serif;
+            --font-body: 'Space Grotesk', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+            --section-pad: clamp(80px, 10vw, 140px);
+            --container: min(1200px, 90vw);
+
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { font-family: var(--font-body); background: var(--navy); color: var(--cream); line-height: 1.6; overflow-x: hidden; }
+        ::selection { background: var(--teal); color: var(--navy); }
+
+        /* Film grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ============================================
+           BLUR-REVEAL ANIMATION (React Bits BlurText inspired)
+           ============================================ */
+        .br {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(24px);
+            transition: opacity 0.9s var(--ease-out-expo), filter 1s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+        }
+        .br.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+        .br-stagger > .br:nth-child(2) { transition-delay: 0.1s; }
+        .br-stagger > .br:nth-child(3) { transition-delay: 0.2s; }
+        .br-stagger > .br:nth-child(4) { transition-delay: 0.3s; }
+        .br-stagger > .br:nth-child(5) { transition-delay: 0.35s; }
+
+        /* ============================================
+           GRADIENT TEXT (React Bits GradientText inspired)
+           ============================================ */
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00C8B4 0%, #00E8D0 25%, #A78BFA 50%, #00C8B4 75%, #00E8D0 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        /* ============================================
+           NAVIGATION
+           ============================================ */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0 clamp(20px, 5vw, 60px);
+            transition: all 0.4s var(--ease-out-expo);
+        }
+        .nav.scrolled {
+            background: rgba(11, 22, 40, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 200, 180, 0.08);
+        }
+        .nav-inner {
+            max-width: var(--container);
+            margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 72px;
+        }
+        .nav-logo {
+            font-family: var(--font-display); font-size: 1.3rem;
+            color: var(--cream); text-decoration: none; letter-spacing: -0.02em;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .logo-icon {
+            width: 32px; height: 32px; background: var(--teal); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; color: var(--navy); font-family: var(--font-mono); font-weight: 600;
+        }
+        .nav-links {
+            display: flex; align-items: center; gap: 32px; list-style: none;
+        }
+        .nav-links a {
+            color: var(--slate); text-decoration: none; font-size: 0.88rem;
+            font-weight: 500; letter-spacing: 0.02em; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--teal); }
+        .nav-cta {
+            background: var(--teal) !important; color: var(--navy) !important;
+            padding: 10px 24px; border-radius: 8px; font-weight: 600 !important;
+            transition: all 0.3s !important;
+        }
+        .nav-cta:hover {
+            background: #00E0CA !important; transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--teal-glow);
+        }
+        .nav-mobile-toggle {
+            display: none; background: none; border: none;
+            color: var(--cream); font-size: 1.5rem; cursor: pointer; padding: 4px;
+        }
+
+        /* ============================================
+           HERO
+           ============================================ */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center;
+            position: relative;
+            padding: 120px clamp(20px, 5vw, 60px) var(--section-pad);
+            overflow: hidden;
+        }
+
+        /* Radial glow */
+        .hero::before {
+            content: '';
+            position: absolute; top: -20%; right: -10%;
+            width: 80vw; height: 80vw; max-width: 900px; max-height: 900px;
+            background: radial-gradient(circle, rgba(0, 200, 180, 0.07) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Dot grid */
+        .hero::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(rgba(0, 200, 180, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse 60% 60% at 70% 40%, black 20%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse 60% 60% at 70% 40%, black 20%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Floating particles (React Bits Particles inspired) */
+        .hero-particles {
+            position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+        }
+        .hero-particles span {
+            position: absolute; border-radius: 50%;
+            background: rgba(0, 200, 180, 0.25);
+            animation: particleFloat linear infinite;
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(40px); opacity: 0; }
+        }
+
+        .hero-inner {
+            max-width: var(--container); margin: 0 auto; width: 100%;
+            position: relative; z-index: 2;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
+            color: var(--teal); letter-spacing: 0.15em; text-transform: uppercase;
+            margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+            opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+        }
+        .hero-eyebrow::before {
+            content: ''; display: inline-block; width: 24px; height: 2px;
+            background: var(--teal);
+        }
+
+        .hero-headline {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 7vw, 5.8rem);
+            line-height: 1.05; letter-spacing: -0.03em;
+            color: var(--cream); max-width: 800px; margin-bottom: 28px;
+            opacity: 0; animation: fadeUp 0.8s 0.35s forwards;
+        }
+
+        .hero-sub {
+            font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+            color: var(--slate); max-width: 560px; line-height: 1.75;
+            margin-bottom: 48px; font-weight: 300;
+            opacity: 0; animation: fadeUp 0.8s 0.5s forwards;
+        }
+        .hero-sub a {
+            color: var(--teal); text-decoration: none;
+            border-bottom: 1px solid rgba(0,200,180,0.3);
+            transition: border-color 0.3s;
+        }
+        .hero-sub a:hover { border-color: var(--teal); }
+
+        .hero-actions {
+            display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+            opacity: 0; animation: fadeUp 0.8s 0.65s forwards;
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 16px 36px; background: var(--teal); color: var(--navy);
+            font-family: var(--font-body); font-size: 1.02rem; font-weight: 600;
+            text-decoration: none; border-radius: 12px; border: none; cursor: pointer;
+            transition: all 0.3s var(--ease-out-expo);
+            position: relative; overflow: hidden;
+        }
+        .btn-primary::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            transform: translateX(-100%); transition: transform 0.6s;
+        }
+        .btn-primary:hover::after { transform: translateX(100%); }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--teal-glow);
+        }
+
+        .btn-ghost {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 16px 32px; background: transparent; color: var(--cream);
+            font-family: var(--font-body); font-size: 1.02rem; font-weight: 500;
+            text-decoration: none; border-radius: 12px;
+            border: 1px solid rgba(240, 237, 230, 0.15); cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-ghost:hover {
+            border-color: var(--teal); color: var(--teal);
+            background: var(--teal-dim);
+        }
+
+        /* ============================================
+           TERMINAL DEMO
+           ============================================ */
+        .terminal-demo {
+            margin-top: 56px; max-width: 720px;
+            opacity: 0; animation: fadeUp 0.8s 0.85s forwards;
+        }
+        .terminal {
+            background: #0D0D0D; border-radius: 12px;
+            border: 1px solid rgba(240, 237, 230, 0.08);
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+        }
+        .terminal-bar {
+            display: flex; gap: 8px; padding: 14px 18px;
+            background: #161616; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .terminal-dot.red { background: #FF5F57; }
+        .terminal-dot.yellow { background: #FFBD2E; }
+        .terminal-dot.green { background: #28C840; }
+        .terminal-body {
+            padding: 20px 22px; font-family: var(--font-mono);
+            font-size: 0.82rem; line-height: 1.9;
+        }
+        .terminal-line { white-space: nowrap; overflow: hidden; }
+        .terminal-prompt { color: var(--teal); }
+        .terminal-cmd { color: var(--cream); }
+        .terminal-output { color: #6B7B8D; }
+        .terminal-highlight { color: var(--teal); font-weight: 500; }
+        .terminal-success { color: #28C840; }
+
+        /* Floating stat badges */
+        .hero-stat-float {
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 16px;
+            opacity: 0; animation: fadeLeft 1s 0.9s forwards;
+        }
+        .stat-badge {
+            background: var(--navy-light); border: 1px solid rgba(0, 200, 180, 0.12);
+            border-radius: 16px; padding: 20px 28px;
+            backdrop-filter: blur(10px); transition: all 0.3s;
+        }
+        .stat-badge:hover {
+            border-color: var(--teal); transform: translateX(-4px);
+            box-shadow: 0 0 30px rgba(0, 200, 180, 0.08);
+        }
+        .stat-badge-number {
+            font-family: var(--font-mono); font-size: 1.8rem; font-weight: 600;
+            color: var(--teal); line-height: 1;
+        }
+        .stat-badge-label { font-size: 0.82rem; color: var(--slate); margin-top: 6px; }
+
+        /* ============================================
+           TRUST BADGES STRIP
+           ============================================ */
+        .trust-strip {
+            border-top: 1px solid rgba(0, 200, 180, 0.08);
+            border-bottom: 1px solid rgba(0, 200, 180, 0.08);
+            background: var(--navy-light);
+            padding: 32px clamp(20px, 5vw, 60px);
+        }
+        .trust-strip-inner {
+            max-width: var(--container); margin: 0 auto;
+            display: flex; justify-content: center; gap: clamp(24px, 5vw, 64px);
+            flex-wrap: wrap;
+        }
+        .trust-badge {
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 0;
+        }
+        .trust-badge-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--teal-dim); display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .trust-badge-text { font-size: 0.88rem; font-weight: 500; color: var(--cream-dim); }
+        .trust-badge-text strong {
+            display: block; color: var(--cream); font-size: 1rem;
+            font-family: var(--font-mono); font-weight: 600;
+        }
+
+        /* ============================================
+           SECTION FOUNDATIONS
+           ============================================ */
+        section { padding: var(--section-pad) clamp(20px, 5vw, 60px); }
+        .section-inner { max-width: var(--container); margin: 0 auto; }
+
+        .section-label {
+            font-family: var(--font-mono); font-size: 0.73rem; font-weight: 500;
+            color: var(--teal); letter-spacing: 0.2em; text-transform: uppercase;
+            margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+        }
+        .section-label::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background: var(--teal); border-radius: 50%;
+        }
+
+        .section-heading {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1.15; letter-spacing: -0.02em;
+            color: var(--cream); max-width: 700px;
+        }
+        .section-heading em { font-style: italic; color: var(--teal); }
+
+        /* Section divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 180, 0.2), transparent);
+        }
+
+        /* ============================================
+           PROBLEM / SOLUTION
+           ============================================ */
+        .problem { background: var(--navy-light); position: relative; }
+        .problem::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 180, 0.25), transparent);
+        }
+        .problem-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+            margin-top: 56px; align-items: start;
+        }
+        .problem-card { padding: 40px; border-radius: 20px; position: relative; }
+        .problem-card.pain {
+            background: rgba(255, 107, 107, 0.04);
+            border: 1px solid rgba(255, 107, 107, 0.12);
+        }
+        .problem-card.solution {
+            background: var(--teal-dim);
+            border: 1px solid rgba(0, 200, 180, 0.15);
+        }
+        .problem-card-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 24px;
+        }
+        .pain .problem-card-icon { background: rgba(255, 107, 107, 0.1); }
+        .solution .problem-card-icon { background: rgba(0, 200, 180, 0.1); }
+        .problem-card h3 {
+            font-family: var(--font-display); font-size: 1.5rem;
+            margin-bottom: 20px; letter-spacing: -0.01em;
+        }
+        .pain h3 { color: var(--coral); }
+        .solution h3 { color: var(--teal); }
+        .problem-card ul { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+        .problem-card li {
+            font-size: 1rem; color: var(--cream-dim);
+            padding-left: 28px; position: relative; line-height: 1.65;
+        }
+        .pain li::before {
+            content: ''; position: absolute; left: 0; top: 10px;
+            width: 12px; height: 2px; background: var(--coral);
+        }
+        .solution li::before {
+            content: ''; position: absolute; left: 2px; top: 7px;
+            width: 8px; height: 12px;
+            border-right: 2px solid var(--teal); border-bottom: 2px solid var(--teal);
+            transform: rotate(45deg);
+        }
+
+        /* ============================================
+           PERSONA CARDS
+           ============================================ */
+        .personas { position: relative; }
+        .persona-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+            margin-top: 56px;
+        }
+        .persona-card {
+            padding: 36px 36px 36px 40px;
+            background: var(--navy-light);
+            border: 1px solid rgba(240, 237, 230, 0.05);
+            border-radius: 20px;
+            position: relative; overflow: hidden;
+            transition: all 0.4s var(--ease-out-expo);
+        }
+        .persona-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 3px; border-radius: 3px;
+            transition: width 0.3s var(--ease-out-expo);
+        }
+        .persona-card:hover {
+            border-color: rgba(0, 200, 180, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+        .persona-card:hover::before { width: 4px; }
+        .persona-card:nth-child(1)::before { background: var(--teal); }
+        .persona-card:nth-child(2)::before { background: var(--purple); }
+        .persona-card:nth-child(3)::before { background: var(--gold); }
+        .persona-card:nth-child(4)::before { background: var(--coral); }
+
+        .persona-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+        }
+        .persona-card:nth-child(1) .persona-icon { background: rgba(0,200,180,0.1); }
+        .persona-card:nth-child(2) .persona-icon { background: rgba(167,139,250,0.1); }
+        .persona-card:nth-child(3) .persona-icon { background: rgba(255,209,102,0.1); }
+        .persona-card:nth-child(4) .persona-icon { background: rgba(255,107,107,0.1); }
+
+        .persona-card h3 {
+            font-family: var(--font-display); font-size: 1.25rem;
+            color: var(--cream); margin-bottom: 10px;
+        }
+        .persona-card p {
+            color: var(--slate); font-size: 0.95rem; line-height: 1.7;
+        }
+
+        /* ============================================
+           HOW IT WORKS
+           ============================================ */
+        .how-it-works { position: relative; background: var(--navy-light); }
+        .how-it-works::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 180, 0.25), transparent);
+        }
+        .steps {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+            margin-top: 56px; position: relative;
+        }
+        .steps::before {
+            content: ''; position: absolute; top: 48px; left: 16.66%; right: 16.66%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--teal), rgba(0, 200, 180, 0.2), var(--teal));
+        }
+        .step { text-align: center; position: relative; padding: 0 20px; }
+        .step-number {
+            width: 96px; height: 96px; margin: 0 auto 32px;
+            background: var(--navy); border: 2px solid rgba(0, 200, 180, 0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            position: relative; z-index: 2; transition: all 0.4s;
+        }
+        .step:hover .step-number {
+            border-color: var(--teal);
+            box-shadow: 0 0 40px rgba(0, 200, 180, 0.12);
+            transform: scale(1.05);
+        }
+        .step-number span {
+            font-family: var(--font-mono); font-size: 2rem; font-weight: 600; color: var(--teal);
+        }
+        .step h3 {
+            font-family: var(--font-display); font-size: 1.35rem;
+            margin-bottom: 12px; color: var(--cream);
+        }
+        .step p {
+            color: var(--slate); font-size: 0.95rem; line-height: 1.7;
+            max-width: 300px; margin: 0 auto;
+        }
+
+        /* ============================================
+           FEATURES (SpotlightCard inspired)
+           ============================================ */
+        .features { position: relative; }
+        .features-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+            margin-top: 56px;
+        }
+        .feature-card {
+            padding: 40px; background: var(--navy-light);
+            border: 1px solid rgba(240, 237, 230, 0.05);
+            border-radius: 20px;
+            transition: all 0.4s var(--ease-out-expo);
+            position: relative; overflow: hidden;
+        }
+        /* Spotlight glow on hover */
+        .feature-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--teal), transparent);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .feature-card::after {
+            content: ''; position: absolute;
+            width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,200,180,0.08) 0%, transparent 70%);
+            top: var(--mouse-y, 50%); left: var(--mouse-x, 50%);
+            transform: translate(-50%, -50%);
+            opacity: 0; transition: opacity 0.4s;
+            pointer-events: none;
+        }
+        .feature-card:hover {
+            border-color: rgba(0, 200, 180, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-card:hover::after { opacity: 1; }
+
+        .feature-icon {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: var(--teal-dim); display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 24px;
+        }
+        .feature-card h3 {
+            font-family: var(--font-display); font-size: 1.25rem;
+            margin-bottom: 12px; color: var(--cream);
+        }
+        .feature-card p { color: var(--slate); font-size: 0.93rem; line-height: 1.7; }
+        .feature-tag {
+            display: inline-block; font-family: var(--font-mono); font-size: 0.68rem;
+            color: var(--teal); background: var(--teal-dim);
+            padding: 4px 10px; border-radius: 4px; margin-top: 16px;
+            letter-spacing: 0.05em; text-transform: uppercase;
+        }
+
+        /* ============================================
+           BENCHMARKS
+           ============================================ */
+        .benchmarks { background: var(--navy-light); position: relative; }
+        .benchmarks::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 180, 0.25), transparent);
+        }
+        .benchmark-table-wrap {
+            margin-top: 56px; overflow-x: auto; border-radius: 20px;
+            border: 1px solid rgba(0, 200, 180, 0.12);
+            background: var(--navy);
+        }
+        .benchmark-table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+        .benchmark-table thead { background: var(--navy-mid); }
+        .benchmark-table th {
+            padding: 20px 28px; text-align: left;
+            font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
+            color: var(--teal); letter-spacing: 0.1em; text-transform: uppercase;
+            border-bottom: 1px solid rgba(0, 200, 180, 0.08);
+        }
+        .benchmark-table td {
+            padding: 18px 28px;
+            border-bottom: 1px solid rgba(240, 237, 230, 0.03);
+            color: var(--cream-dim);
+        }
+        .benchmark-table tr:last-child td { border-bottom: none; }
+        .benchmark-table tbody tr { transition: background 0.2s; }
+        .benchmark-table tbody tr:hover { background: rgba(0, 200, 180, 0.03); }
+        .benchmark-table .metric-name { font-weight: 500; color: var(--cream); }
+        .benchmark-table .ai-val { color: var(--teal); font-family: var(--font-mono); font-weight: 600; }
+        .benchmark-table .human-val { color: var(--slate); font-family: var(--font-mono); }
+        .winner {
+            font-size: 0.73rem; padding: 4px 10px; border-radius: 20px;
+            font-weight: 600; font-family: var(--font-mono);
+        }
+        .winner-ai { background: var(--teal-dim); color: var(--teal); }
+        .benchmark-source {
+            margin-top: 20px; font-size: 0.85rem; color: var(--slate); line-height: 1.6;
+        }
+        .benchmark-source a {
+            color: var(--teal); text-decoration: none;
+            border-bottom: 1px solid rgba(0,200,180,0.3);
+        }
+
+        /* ============================================
+           COMPETITORS
+           ============================================ */
+        .competitors { position: relative; }
+        .competitor-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; margin-top: 56px;
+        }
+        .competitor-card {
+            padding: 28px; background: var(--navy-light);
+            border: 1px solid rgba(240, 237, 230, 0.05);
+            border-radius: 16px; transition: all 0.3s;
+        }
+        .competitor-card.highlight {
+            border-color: rgba(0, 200, 180, 0.25);
+            background: linear-gradient(135deg, rgba(0,200,180,0.06) 0%, var(--navy-light) 100%);
+        }
+        .competitor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .competitor-name {
+            font-family: var(--font-display); font-size: 1.15rem;
+            color: var(--cream); margin-bottom: 16px;
+        }
+        .highlight .competitor-name { color: var(--teal); }
+        .competitor-stats {
+            list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;
+        }
+        .competitor-stats li {
+            font-size: 0.85rem; color: var(--cream-dim); line-height: 1.5;
+        }
+        .competitor-stats strong { color: var(--slate); font-weight: 500; }
+        .competitor-note {
+            font-size: 0.82rem; color: var(--slate); line-height: 1.6;
+            padding-top: 12px; border-top: 1px solid rgba(240,237,230,0.05);
+        }
+
+        /* ============================================
+           PRICING
+           ============================================ */
+        .pricing { background: var(--navy-light); position: relative; }
+        .pricing::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 180, 0.25), transparent);
+        }
+        .pricing-header { text-align: center; margin-bottom: 20px; }
+        .pricing-sub {
+            color: var(--slate); font-size: 1.05rem; margin-top: 16px;
+            max-width: 560px; margin-left: auto; margin-right: auto; line-height: 1.7;
+        }
+        .pricing-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+            max-width: 760px; margin: 48px auto 0;
+        }
+        .price-card {
+            padding: 40px; background: var(--navy); border-radius: 20px;
+            border: 1px solid rgba(240, 237, 230, 0.06);
+            text-align: center; transition: all 0.4s;
+            position: relative;
+        }
+        .price-card.featured {
+            border-color: rgba(0, 200, 180, 0.25);
+            box-shadow: 0 0 60px rgba(0, 200, 180, 0.06);
+        }
+        .price-card.featured::before {
+            content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.1em; color: var(--navy);
+            background: var(--teal); padding: 4px 16px; border-radius: 20px;
+        }
+        .price-tier {
+            font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500;
+            color: var(--teal); letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .price-amount {
+            font-family: var(--font-display); font-size: 3.5rem;
+            color: var(--cream); line-height: 1; margin-bottom: 4px;
+        }
+        .price-amount .currency {
+            font-size: 1.5rem; vertical-align: super; margin-right: 2px;
+            color: var(--cream-muted);
+        }
+        .price-period { color: var(--slate); font-size: 0.88rem; margin-bottom: 20px; }
+        .price-desc {
+            color: var(--cream-dim); font-size: 0.93rem; line-height: 1.6;
+            margin-bottom: 24px; min-height: 48px;
+        }
+        .price-features {
+            list-style: none; text-align: left; margin-bottom: 32px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .price-features li {
+            font-size: 0.9rem; color: var(--cream-dim);
+            padding-left: 24px; position: relative;
+        }
+        .price-features li::before {
+            content: ''; position: absolute; left: 2px; top: 5px;
+            width: 7px; height: 11px;
+            border-right: 2px solid var(--teal); border-bottom: 2px solid var(--teal);
+            transform: rotate(45deg);
+        }
+        .price-cta {
+            display: block; padding: 14px 28px; border-radius: 10px;
+            text-decoration: none; font-weight: 600; font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .price-cta-primary {
+            background: var(--teal); color: var(--navy);
+        }
+        .price-cta-primary:hover {
+            background: #00E0CA; transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--teal-glow);
+        }
+        .price-cta-outline {
+            background: transparent; color: var(--cream);
+            border: 1px solid rgba(240, 237, 230, 0.15);
+        }
+        .price-cta-outline:hover {
+            border-color: var(--teal); color: var(--teal);
+            background: var(--teal-dim);
+        }
+
+        /* ============================================
+           GETTING STARTED
+           ============================================ */
+        .getting-started { position: relative; }
+        .gs-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+            margin-top: 56px;
+        }
+        .gs-step {
+            padding: 32px 28px; background: var(--navy-light);
+            border: 1px solid rgba(240, 237, 230, 0.05);
+            border-radius: 16px; transition: all 0.3s;
+        }
+        .gs-step:hover {
+            border-color: rgba(0, 200, 180, 0.15);
+            transform: translateY(-2px);
+        }
+        .gs-step-number {
+            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+            color: var(--teal); letter-spacing: 0.15em; margin-bottom: 16px;
+        }
+        .gs-step h3 {
+            font-family: var(--font-display); font-size: 1.15rem;
+            color: var(--cream); margin-bottom: 10px;
+        }
+        .gs-step p { color: var(--slate); font-size: 0.9rem; line-height: 1.65; }
+        .gs-footer {
+            text-align: center; margin-top: 40px;
+            font-family: var(--font-mono); font-size: 0.88rem; color: var(--slate);
+        }
+        .gs-footer span { color: var(--teal); font-weight: 600; }
+
+        /* ============================================
+           FAQ
+           ============================================ */
+        .faq { background: var(--navy-light); position: relative; }
+        .faq::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 180, 0.25), transparent);
+        }
+        .faq-list { max-width: 800px; margin: 48px auto 0; }
+        .faq-item {
+            border-bottom: 1px solid rgba(240, 237, 230, 0.06);
+        }
+        .faq-question {
+            width: 100%; background: none; border: none; color: var(--cream);
+            font-family: var(--font-body); font-size: 1.05rem; font-weight: 500;
+            text-align: left; padding: 24px 0; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: color 0.3s;
+        }
+        .faq-question:hover { color: var(--teal); }
+        .faq-toggle {
+            width: 24px; height: 24px; flex-shrink: 0; margin-left: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .faq-toggle svg {
+            width: 12px; height: 12px; stroke: var(--slate);
+            stroke-width: 2; transition: transform 0.3s;
+        }
+        .faq-item.active .faq-toggle svg { transform: rotate(45deg); }
+        .faq-answer {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s var(--ease-out-expo);
+        }
+        .faq-answer-inner {
+            padding: 0 0 24px 0; color: var(--cream-dim);
+            font-size: 0.95rem; line-height: 1.75;
+        }
+        .faq-answer-inner a {
+            color: var(--teal); text-decoration: none;
+            border-bottom: 1px solid rgba(0,200,180,0.3);
+        }
+        .faq-answer-inner strong { color: var(--cream); }
+        .faq-answer-inner em { font-style: italic; color: var(--cream-dim); }
+
+        /* ============================================
+           FOUNDER STORY
+           ============================================ */
+        .founder { position: relative; }
+        .founder-inner {
+            max-width: 700px; margin: 0 auto; text-align: center;
+            padding: 60px 40px;
+            background: var(--navy-light);
+            border: 1px solid rgba(0, 200, 180, 0.08);
+            border-radius: 24px;
+            position: relative;
+        }
+        .founder-quote-mark {
+            font-family: var(--font-display); font-size: 6rem;
+            color: var(--teal); line-height: 0.5; opacity: 0.2;
+            margin-bottom: 16px;
+        }
+        .founder-quote {
+            font-family: var(--font-display); font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+            color: var(--cream); line-height: 1.6; font-style: italic;
+            margin-bottom: 28px;
+        }
+        .founder-attribution {
+            font-family: var(--font-mono); font-size: 0.8rem;
+            color: var(--slate); letter-spacing: 0.08em;
+        }
+        .founder-label {
+            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500;
+            color: var(--teal); letter-spacing: 0.2em; text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+
+        /* ============================================
+           CTA BANNER
+           ============================================ */
+        .cta-banner {
+            background: linear-gradient(135deg, var(--navy-mid) 0%, var(--navy) 100%);
+            position: relative; overflow: hidden;
+        }
+        .cta-banner::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 50% 80% at 50% 100%, rgba(0,200,180,0.06), transparent);
+            pointer-events: none;
+        }
+        .cta-banner .section-heading { margin: 0 auto 16px; }
+        .cta-banner p {
+            color: var(--slate); font-size: 1.05rem; margin-bottom: 32px;
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
+            padding: 32px clamp(20px, 5vw, 60px);
+            border-top: 1px solid rgba(240, 237, 230, 0.05);
+        }
+        .footer-inner {
+            max-width: var(--container); margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-left { display: flex; align-items: center; gap: 24px; }
+        .footer-logo {
+            font-family: var(--font-display); font-size: 1.1rem;
+            color: var(--cream); text-decoration: none;
+        }
+        .footer-copy { font-size: 0.82rem; color: var(--slate); }
+        .footer-links {
+            list-style: none; display: flex; gap: 28px;
+        }
+        .footer-links a {
+            color: var(--slate); text-decoration: none; font-size: 0.85rem;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover { color: var(--teal); }
+
+        /* ============================================
+           KEYFRAME ANIMATIONS
+           ============================================ */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeLeft {
+            from { opacity: 0; transform: translate(30px, -50%); }
+            to { opacity: 1; transform: translate(0, -50%); }
+        }
+        @keyframes terminalType {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 968px) {
+            .hero-stat-float { display: none; }
+            .problem-grid { grid-template-columns: 1fr; gap: 24px; }
+            .persona-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; gap: 48px; }
+            .steps::before { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .competitor-grid { grid-template-columns: 1fr 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+            .gs-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-links.open {
+                display: flex; flex-direction: column;
+                position: absolute; top: 72px; left: 0; right: 0;
+                background: rgba(11, 22, 40, 0.98);
+                backdrop-filter: blur(20px);
+                padding: 24px; gap: 16px;
+                border-bottom: 1px solid rgba(0, 200, 180, 0.1);
+            }
+            .nav-mobile-toggle { display: block; }
+            .competitor-grid { grid-template-columns: 1fr; }
+            .gs-grid { grid-template-columns: 1fr; }
+            .trust-strip-inner { gap: 20px; }
+            .trust-badge { flex: 1 1 140px; }
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+            .footer-left { flex-direction: column; gap: 8px; }
+            .footer-links { gap: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-headline { font-size: clamp(2.4rem, 10vw, 3.5rem); }
+            .terminal-body { font-size: 0.7rem; padding: 14px 16px; }
+            .founder-inner { padding: 40px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ NAVIGATION ============ -->
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <span class="logo-icon">EF</span>
+                EvidenceFlow
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#benchmarks">Evidence</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800" class="nav-cta">Get Started</a></li>
+            </ul>
+            <button class="nav-mobile-toggle" id="navToggle" aria-label="Toggle menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+        <div class="hero-particles" id="heroParticles"></div>
+
+        <div class="hero-inner">
+            <p class="hero-eyebrow">AI-Powered Systematic Review Screening</p>
+
+            <h1 class="hero-headline">
+                10,000 papers.<br><em class="gradient-text">One afternoon.</em>
+            </h1>
+
+            <p class="hero-sub">
+                AI screens your title-abstract queue against your inclusion criteria in minutes, not months.
+                Published research demonstrates 99.5% sensitivity (<a href="https://doi.org/10.1186/s13643-024-02575-4" target="_blank" rel="noopener">Guo et al., 2024</a>; <a href="https://doi.org/10.1002/jrsm.1691" target="_blank" rel="noopener">Kellermeyer et al., 2024</a>). Full PRISMA-compliant audit trails. Get to publication faster.
+            </p>
+
+            <div class="hero-actions">
+                <a href="https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800" class="btn-primary">
+                    Get Started
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                </a>
+                <a href="#how-it-works" class="btn-ghost">
+                    See How It Works
+                </a>
+            </div>
+
+            <!-- Terminal demo -->
+            <div class="terminal-demo">
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <span class="terminal-dot red"></span>
+                        <span class="terminal-dot yellow"></span>
+                        <span class="terminal-dot green"></span>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line"><span class="terminal-prompt">$</span> <span class="terminal-cmd">evidenceflow --protocol review.json</span></div>
+                        <div class="terminal-line"><span class="terminal-output">Loading protocol... 14 inclusion criteria found</span></div>
+                        <div class="terminal-line"><span class="terminal-output">Connected to Covidence review #555115</span></div>
+                        <div class="terminal-line"><span class="terminal-output">Screening batch 1/60... </span><span class="terminal-highlight">100 papers analyzed</span></div>
+                        <div class="terminal-line"><span class="terminal-output">Screening batch 2/60... </span><span class="terminal-highlight">100 papers analyzed</span></div>
+                        <div class="terminal-line"><span class="terminal-output">...</span></div>
+                        <div class="terminal-line"><span class="terminal-success">Done.</span> <span class="terminal-output">6,000 papers screened in </span><span class="terminal-highlight">58m 14s</span></div>
+                        <div class="terminal-line"><span class="terminal-output">Yes: </span><span class="terminal-highlight">412</span><span class="terminal-output"> | No: </span><span class="terminal-highlight">5,396</span><span class="terminal-output"> | Maybe: </span><span class="terminal-highlight">192</span></div>
+                        <div class="terminal-line"><span class="terminal-output">Audit log saved to </span><span class="terminal-success">screening_results.json</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating stats (desktop) -->
+        <div class="hero-stat-float">
+            <div class="stat-badge">
+                <div class="stat-badge-number" data-count="240" data-suffix="x">0x</div>
+                <div class="stat-badge-label">Faster than manual</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-badge-number" data-count="99.5" data-suffix="%" data-decimal="true">0%</div>
+                <div class="stat-badge-label">Sensitivity (recall)</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-badge-number" data-count="29" data-prefix="$">$0</div>
+                <div class="stat-badge-label">Per review, one-time</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ TRUST BADGES STRIP ============ -->
+    <div class="trust-strip br">
+        <div class="trust-strip-inner">
+            <div class="trust-badge">
+                <div class="trust-badge-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="trust-badge-text">
+                    <strong>99.5%</strong>
+                    Sensitivity
+                </div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="trust-badge-text">
+                    <strong>PRISMA</strong>
+                    Compliant
+                </div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="trust-badge-text">
+                    <strong>Covidence</strong>
+                    Integrated
+                </div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-badge-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                </div>
+                <div class="trust-badge-text">
+                    <strong>Published</strong>
+                    Research-Backed
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PROBLEM / SOLUTION ============ -->
+    <section class="problem" id="problem">
+        <div class="section-inner">
+            <div class="br">
+                <p class="section-label">The Problem</p>
+                <h2 class="section-heading">
+                    Title-abstract screening is the bottleneck<br>of every <em>systematic review.</em>
+                </h2>
+            </div>
+
+            <div class="problem-grid br-stagger">
+                <div class="problem-card pain br">
+                    <div class="problem-card-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                    </div>
+                    <h3>Without EvidenceFlow</h3>
+                    <ul>
+                        <li>25 papers per hour. A 5,000-paper search takes weeks of full-time screening work.</li>
+                        <li>Your publication timeline stalls while you wait on teammates or wade through abstracts.</li>
+                        <li>Fatigue-induced errors compound after hour three. Relevant studies silently get excluded.</li>
+                        <li>No systematic audit trail. Reviewers cannot recall their reasoning months later at peer review.</li>
+                    </ul>
+                </div>
+                <div class="problem-card solution br">
+                    <div class="problem-card-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <h3>With EvidenceFlow</h3>
+                    <ul>
+                        <li>6,000+ papers per hour. Your entire search screened before lunch.</li>
+                        <li>Affordable for students and early-career researchers. One purchase covers your entire review.</li>
+                        <li>Published research shows 99.5% sensitivity (<a href="https://doi.org/10.1186/s13643-024-02575-4" target="_blank" rel="noopener" style="color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(0,200,180,0.3);">Guo et al., 2024</a>), higher than fatigued human reviewers.</li>
+                        <li>Every decision logged with full AI reasoning and confidence scores. PRISMA-ready from day one.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PERSONA CARDS ============ -->
+    <section class="personas" id="personas">
+        <div class="section-inner">
+            <div class="br" style="text-align: center;">
+                <p class="section-label" style="justify-content: center;">Who It's For</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    Built for researchers <em>like you.</em>
+                </h2>
+            </div>
+
+            <div class="persona-grid br-stagger">
+                <div class="persona-card br">
+                    <div class="persona-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+                    </div>
+                    <h3>PhD Student</h3>
+                    <p>Assigned 11,000 papers for your first systematic review. You need to get through screening to reach data extraction, analysis, and publication. Months of manual screening is not an option.</p>
+                </div>
+                <div class="persona-card br">
+                    <div class="persona-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    </div>
+                    <h3>Postdoc Researcher</h3>
+                    <p>Running two concurrent reviews while teaching and writing grants. You cannot afford months of manual screening on top of everything else. You need speed without sacrificing methodological rigor.</p>
+                </div>
+                <div class="persona-card br">
+                    <div class="persona-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD166" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                    </div>
+                    <h3>Research Lab</h3>
+                    <p>Multiple team members, multiple reviews happening in parallel. You need consistent, auditable screening decisions across projects, and a tool that integrates with your existing Covidence workflow.</p>
+                </div>
+                <div class="persona-card br">
+                    <div class="persona-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3>Clinical Guideline Team</h3>
+                    <p>Rapid evidence synthesis with tight deadlines from regulatory or institutional bodies. You need defensible methodology under time pressure, with complete audit trails for every screening decision.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-inner">
+            <div class="br" style="text-align: center;">
+                <p class="section-label" style="justify-content: center;">How It Works</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    Three steps. <em>Minutes,</em> not months.
+                </h2>
+            </div>
+
+            <div class="steps br-stagger">
+                <div class="step br">
+                    <div class="step-number"><span>1</span></div>
+                    <h3>Define Your Protocol</h3>
+                    <p>Specify your PICOS framework, inclusion/exclusion criteria, and screening rules in a structured JSON template. The AI learns exactly what your review requires.</p>
+                </div>
+                <div class="step br">
+                    <div class="step-number"><span>2</span></div>
+                    <h3>Connect to Covidence</h3>
+                    <p>EvidenceFlow integrates directly with your Covidence review. It reads titles, abstracts, and metadata from your existing workflow. No CSV exports needed.</p>
+                </div>
+                <div class="step br">
+                    <div class="step-number"><span>3</span></div>
+                    <h3>AI Screens &amp; Votes</h3>
+                    <p>Advanced AI evaluates each paper against your criteria with a tiered approach: rapid first-pass screening, then deeper analysis for uncertain cases. Every decision is logged with full reasoning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="features" id="features">
+        <div class="section-inner">
+            <div class="br">
+                <p class="section-label">Features</p>
+                <h2 class="section-heading">
+                    Built for the rigor<br>your review <em>demands.</em>
+                </h2>
+            </div>
+
+            <div class="features-grid br-stagger">
+                <div class="feature-card br">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <h3>Native Covidence Integration</h3>
+                    <p>Connects directly to your Covidence review via browser automation. No CSV exports, no copy-pasting. Votes appear in Covidence exactly as if a human reviewer submitted them.</p>
+                    <span class="feature-tag">Zero-friction workflow</span>
+                </div>
+                <div class="feature-card br">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <h3>Tiered AI Engine</h3>
+                    <p>A fast first-pass model handles high-volume screening at scale. Edge cases and uncertain papers get escalated to a deeper analytical model for a second evaluation. Fast screening plus deep analysis where it matters.</p>
+                    <span class="feature-tag">Tiered intelligence</span>
+                </div>
+                <div class="feature-card br">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                    </div>
+                    <h3>PRISMA-Compliant Audit Trails</h3>
+                    <p>Every screening decision is logged with the AI's full reasoning, confidence score, and criteria evaluation. Export-ready for your PRISMA flow diagram and methods section.</p>
+                    <span class="feature-tag">Publication-ready</span>
+                </div>
+                <div class="feature-card br">
+                    <div class="feature-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C8B4" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    </div>
+                    <h3>Your Protocol, Your Rules</h3>
+                    <p>Define screening criteria using a structured JSON protocol template. PICOS framework, study type filters, date ranges, language requirements. The AI follows your methodological decisions exactly.</p>
+                    <span class="feature-tag">Fully configurable</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ BENCHMARKS ============ -->
+    <section class="benchmarks" id="benchmarks">
+        <div class="section-inner">
+            <div class="br" style="text-align: center;">
+                <p class="section-label" style="justify-content: center;">Evidence</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    How AI screening compares to <em>manual review.</em>
+                </h2>
+            </div>
+
+            <div class="benchmark-table-wrap br">
+                <table class="benchmark-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>AI-Assisted Screening</th>
+                            <th>Manual Review</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="metric-name">Screening Speed</td>
+                            <td class="ai-val">6,000+ papers/hr</td>
+                            <td class="human-val">~25 papers/hr</td>
+                            <td><span class="winner winner-ai">240x faster</span></td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Sensitivity (Recall)</td>
+                            <td class="ai-val">99.5%</td>
+                            <td class="human-val">~92-95%</td>
+                            <td><span class="winner winner-ai">Fewer missed</span></td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Cost per Review</td>
+                            <td class="ai-val">$29 one-time</td>
+                            <td class="human-val">$2,000-4,000+</td>
+                            <td><span class="winner winner-ai">Save thousands</span></td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Fatigue Degradation</td>
+                            <td class="ai-val">None</td>
+                            <td class="human-val">Significant after 2-3hrs</td>
+                            <td><span class="winner winner-ai">Consistent</span></td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Audit Trail</td>
+                            <td class="ai-val">Full reasoning per paper</td>
+                            <td class="human-val">Rarely documented</td>
+                            <td><span class="winner winner-ai">Transparent</span></td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Availability</td>
+                            <td class="ai-val">24/7, instant</td>
+                            <td class="human-val">Working hours only</td>
+                            <td><span class="winner winner-ai">Always on</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="benchmark-source br">
+                Sensitivity and human reviewer performance figures are based on published systematic review methodology research, including <a href="https://doi.org/10.1186/s13643-024-02575-4" target="_blank" rel="noopener">Guo et al. (2024)</a> and <a href="https://doi.org/10.1002/jrsm.1691" target="_blank" rel="noopener">Kellermeyer et al. (2024)</a>. Individual results may vary by review topic and protocol specificity.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============ COMPETITOR COMPARISON ============ -->
+    <section class="competitors" id="alternatives">
+        <div class="section-inner">
+            <div class="br" style="text-align: center;">
+                <p class="section-label" style="justify-content: center;">Alternatives</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    Why <em>EvidenceFlow?</em>
+                </h2>
+                <p style="color: var(--slate); font-size: 1.02rem; margin-top: 16px; max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.7;">
+                    There are several ways to approach screening. Each has strengths. Here is how they compare when the goal is speed, accuracy, and a defensible audit trail.
+                </p>
+            </div>
+
+            <div class="competitor-grid br-stagger">
+                <div class="competitor-card br">
+                    <h3 class="competitor-name">Manual Dual Review</h3>
+                    <ul class="competitor-stats">
+                        <li><strong>Speed:</strong> ~25 papers/hour</li>
+                        <li><strong>Cost:</strong> $2,000-4,000+ per review</li>
+                        <li><strong>Automation:</strong> None</li>
+                        <li><strong>Timeline:</strong> Weeks to months</li>
+                    </ul>
+                    <p class="competitor-note">The gold standard for rigor, but expensive and slow. Reviewer fatigue reduces sensitivity after 2-3 hours.</p>
+                </div>
+                <div class="competitor-card br">
+                    <h3 class="competitor-name">Rayyan</h3>
+                    <ul class="competitor-stats">
+                        <li><strong>Speed:</strong> ~25 papers/hour</li>
+                        <li><strong>Cost:</strong> Free</li>
+                        <li><strong>Automation:</strong> Labels and filters</li>
+                        <li><strong>Timeline:</strong> Weeks to months</li>
+                    </ul>
+                    <p class="competitor-note">Good free tool for organizing screening. Still requires manual decisions on every paper.</p>
+                </div>
+                <div class="competitor-card br">
+                    <h3 class="competitor-name">ASReview</h3>
+                    <ul class="competitor-stats">
+                        <li><strong>Speed:</strong> Variable</li>
+                        <li><strong>Cost:</strong> Free / open-source</li>
+                        <li><strong>Automation:</strong> Active learning</li>
+                        <li><strong>Timeline:</strong> Days to weeks</li>
+                    </ul>
+                    <p class="competitor-note">Strong active learning prioritization. Reduces workload but still requires a human decision on each paper.</p>
+                </div>
+                <div class="competitor-card br">
+                    <h3 class="competitor-name">Covidence Alone</h3>
+                    <ul class="competitor-stats">
+                        <li><strong>Speed:</strong> ~25 papers/hour</li>
+                        <li><strong>Cost:</strong> $240+ per review</li>
+                        <li><strong>Automation:</strong> Workflow management</li>
+                        <li><strong>Timeline:</strong> Weeks to months</li>
+                    </ul>
+                    <p class="competitor-note">Excellent workflow management and conflict resolution. Does not automate the screening decisions themselves.</p>
+                </div>
+                <div class="competitor-card highlight br">
+                    <h3 class="competitor-name">EvidenceFlow</h3>
+                    <ul class="competitor-stats">
+                        <li><strong>Speed:</strong> 6,000+ papers/hour</li>
+                        <li><strong>Cost:</strong> $29 one-time</li>
+                        <li><strong>Automation:</strong> Full AI screening</li>
+                        <li><strong>Timeline:</strong> Minutes to hours</li>
+                    </ul>
+                    <p class="competitor-note">AI screens automatically against your criteria. Full audit trail with reasoning for every decision. Integrates directly with Covidence.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PRICING ============ -->
+    <section class="pricing" id="pricing">
+        <div class="section-inner">
+            <div class="pricing-header br">
+                <p class="section-label" style="justify-content: center;">Pricing</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    Get to publication <em>faster.</em>
+                </h2>
+                <p class="pricing-sub">
+                    One payment covers your entire systematic review. No subscriptions, no per-paper charges. Try free on 100 papers first.
+                </p>
+            </div>
+
+            <div class="pricing-grid br-stagger">
+                <div class="price-card br">
+                    <p class="price-tier">Free Trial</p>
+                    <p class="price-amount"><span class="currency">$</span>0</p>
+                    <p class="price-period">no credit card</p>
+                    <p class="price-desc">
+                        Test on 100 papers from your review. See the quality of AI screening decisions before you commit.
+                    </p>
+                    <ul class="price-features">
+                        <li>100 papers included</li>
+                        <li>Full Covidence integration</li>
+                        <li>Tiered AI screening</li>
+                        <li>Complete audit trail</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800" class="price-cta price-cta-outline">
+                        Start Free Trial
+                    </a>
+                </div>
+
+                <div class="price-card featured br">
+                    <p class="price-tier">Single Review</p>
+                    <p class="price-amount"><span class="currency">$</span>29</p>
+                    <p class="price-period">one-time payment</p>
+                    <p class="price-desc">
+                        Covers your entire systematic review, regardless of how many papers. One purchase, one complete review.
+                    </p>
+                    <ul class="price-features">
+                        <li>Unlimited papers for one review</li>
+                        <li>Full Covidence integration</li>
+                        <li>Tiered AI screening</li>
+                        <li>PRISMA-compliant exports</li>
+                        <li>Email support</li>
+                    </ul>
+                    <a href="https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800" class="price-cta price-cta-primary">
+                        Buy Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ GETTING STARTED ============ -->
+    <section class="getting-started" id="getting-started">
+        <div class="section-inner">
+            <div class="br" style="text-align: center;">
+                <p class="section-label" style="justify-content: center;">After You Purchase</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    From purchase to screening<br>in <em>ten minutes.</em>
+                </h2>
+            </div>
+
+            <div class="gs-grid br-stagger">
+                <div class="gs-step br">
+                    <p class="gs-step-number">STEP 01</p>
+                    <h3>Instant Access</h3>
+                    <p>After purchase, you receive a license key by email. Download the tool and run the setup script. Takes about five minutes.</p>
+                </div>
+                <div class="gs-step br">
+                    <p class="gs-step-number">STEP 02</p>
+                    <h3>Create Your Protocol</h3>
+                    <p>Define your screening criteria using the guided protocol builder in the app. Takes about five minutes.</p>
+                </div>
+                <div class="gs-step br">
+                    <p class="gs-step-number">STEP 03</p>
+                    <h3>Connect Covidence</h3>
+                    <p>Link your Covidence review. The AI reads directly from your existing screening queue.</p>
+                </div>
+                <div class="gs-step br">
+                    <p class="gs-step-number">STEP 04</p>
+                    <h3>AI Screens Your Papers</h3>
+                    <p>Start screening. The AI evaluates every paper against your criteria in minutes, not months.</p>
+                </div>
+            </div>
+
+            <div class="gs-footer br">
+                <p>Total setup time: <span>~10 minutes</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="faq" id="faq">
+        <div class="section-inner">
+            <div class="br" style="text-align: center;">
+                <p class="section-label" style="justify-content: center;">FAQ</p>
+                <h2 class="section-heading" style="margin: 0 auto;">
+                    Common questions from <em>researchers.</em>
+                </h2>
+            </div>
+
+            <div class="faq-list br">
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Can I really trust AI for something this important?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            This is the right question to ask, and the short answer is: you should not trust it blindly, and the tool is not designed to be trusted blindly. EvidenceFlow is built as a <strong>second reviewer</strong>, not a replacement for your own judgment. You remain the primary screener. The AI acts as Reviewer #2, the same role a research assistant or colleague would fill.<br><br>
+                            The key safeguard is that the system is deliberately calibrated to <strong>err on the side of inclusion</strong>. When the AI is uncertain, it includes rather than excludes. This means you may see some false positives (papers included that probably should not be), but false negatives (the dangerous kind, where a relevant study gets missed) are minimized. Published research on LLM-assisted screening reports sensitivity (recall) of 99.5%, which exceeds the 92-95% typically observed in manual screening, particularly after reviewer fatigue sets in.<br><br>
+                            We recommend validating on a batch of papers you have already screened manually. Compare the AI's decisions with yours. If agreement is high (most teams see 95%+ concordance), you can proceed with confidence. If it is not, refine your protocol criteria before scaling up. The audit trail makes every AI decision fully inspectable.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Where does the 99.5% sensitivity figure come from?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            This figure comes from published academic research on LLM-assisted systematic review screening, not from our own marketing claims. Multiple studies have evaluated large language models for title-abstract screening and reported sensitivity at or above 99% when the model is configured to prioritize recall over precision. This is the correct trade-off for screening, where missing a relevant study is far more costly than including an irrelevant one.<br><br>
+                            Your actual results will depend on the clarity of your inclusion criteria, the specificity of your research question, and the domain of your review. We strongly recommend running a validation batch before relying on AI screening for your full review. The tool's audit logs make it straightforward to calculate sensitivity and specificity against your own gold-standard decisions.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        How do I report this in my methods section?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Full transparency is essential and straightforward. EvidenceFlow generates a complete audit trail for every screening decision, including the AI model used, the reasoning for each decision, and confidence scores. This data can be reported directly in your methods section.<br><br>
+                            A suggested approach: <em>"Title and abstract screening was performed independently by [Reviewer 1] and an AI-assisted screening tool (EvidenceFlow) using [model name]. The AI reviewer was configured with pre-specified inclusion and exclusion criteria based on PICOS framework. Conflicts between the human reviewer and AI reviewer were resolved by [process]. The AI screening tool provided a documented rationale for each decision, which is available as supplementary material."</em><br><br>
+                            This framing is consistent with emerging best practices for reporting AI-assisted systematic reviews. The PRISMA-compliant export provides all the data you need for your flow diagram and supplementary materials.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Does it work with Covidence?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Yes. EvidenceFlow integrates natively with Covidence through browser automation. It reads your imported references directly from Covidence and submits screening votes exactly as a human reviewer would. Your existing Covidence workflow remains completely intact; the AI simply appears as another reviewer on your team. No data export or import steps are required.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        What happens with papers the AI is unsure about?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Papers that do not clearly meet or fail your criteria are marked as "Maybe" and are never automatically excluded. With the optional escalation feature enabled, Maybe papers are forwarded to a deeper analytical AI model for a more thorough second evaluation. Any papers that remain uncertain after both AI passes are flagged for your manual review.<br><br>
+                            The system is designed around a core principle: <strong>when in doubt, include</strong>. This is the same conservative approach recommended by Cochrane methodology guidelines for title-abstract screening. You will never lose a borderline-relevant study to an overconfident AI decision.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        How does pricing work?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            EvidenceFlow uses a simple one-time payment model. The <strong>Free Trial</strong> includes 100 papers at no cost and requires no credit card, enough to validate the tool on a sample from your review. The <strong>Single Review</strong> plan ($29 one-time) covers unlimited papers for one systematic review. Your license key binds to a single Covidence review ID on first use.<br><br>
+                            For context, a single systematic review typically costs $2,000-4,000+ in second-reviewer time alone. EvidenceFlow covers the same work for a fraction of that. If you need to screen a different review, purchase an additional license key.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        How do I define my screening criteria?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            You create a JSON protocol file using the provided template. The protocol supports PICOS framework fields (Population, Intervention, Comparison, Outcome, Study design), date ranges, language requirements, and custom inclusion/exclusion criteria. The more specific and well-defined your criteria, the more accurate the screening will be. The same principle applies to training a human research assistant.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        Is my review data secure?
+                        <span class="faq-toggle"><svg viewBox="0 0 12 12"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg></span>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            EvidenceFlow runs locally on your machine. Paper titles and abstracts are sent to AI APIs for screening decisions, but no data is stored on external servers beyond standard API processing. Your API keys are stored locally in a private environment file (.env) and are never transmitted to any third party. The tool never has access to full-text PDFs, only titles, abstracts, and metadata that are already publicly available in bibliographic databases.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FOUNDER STORY ============ -->
+    <section class="founder" id="story">
+        <div class="section-inner">
+            <div class="founder-inner br">
+                <p class="founder-label">Why I Built This</p>
+                <div class="founder-quote-mark">"</div>
+                <p class="founder-quote">
+                    I was assigned 11,000 papers for my first systematic review. The screening alone would have taken months of full-time work. I looked at every tool available: Rayyan, ASReview, Covidence. They all helped organize the work, but none of them could actually make the screening decisions for me. So I built one that could.
+                </p>
+                <p class="founder-attribution">
+                    Founder, EvidenceFlow
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTA BANNER ============ -->
+    <section class="cta-banner">
+        <div class="section-inner br" style="text-align: center;">
+            <h2 class="section-heading" style="margin: 0 auto;">
+                Your papers are waiting.<br><em>Screen them today.</em>
+            </h2>
+            <p>$29 for your entire review. Full audit trail included.</p>
+            <a href="https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800" class="btn-primary">
+                Get Started
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <a href="#" class="footer-logo">EvidenceFlow</a>
+                <span class="footer-copy">&copy; 2026 EvidenceFlow. All rights reserved.</span>
+            </div>
+            <ul class="footer-links">
+                <li><a href="mailto:evidenceflowofficial@gmail.com">Contact</a></li>
+                <li><a href="https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800">Purchase</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- ============ JAVASCRIPT ============ -->
+    <script>
+        // --- NAV SCROLL ---
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        }, { passive: true });
+
+        // --- MOBILE NAV ---
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+
+        // --- BLUR REVEAL (React Bits BlurText inspired) ---
+        const brObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    brObserver.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '0px 0px -40px 0px', threshold: 0.1 });
+
+        document.querySelectorAll('.br').forEach(el => brObserver.observe(el));
+
+        // --- FAQ ACCORDION ---
+        document.querySelectorAll('.faq-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.closest('.faq-item');
+                const answer = item.querySelector('.faq-answer');
+                const isOpen = item.classList.contains('active');
+
+                document.querySelectorAll('.faq-item.active').forEach(openItem => {
+                    openItem.classList.remove('active');
+                    openItem.querySelector('.faq-answer').style.maxHeight = '0';
+                    openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                });
+
+                if (!isOpen) {
+                    item.classList.add('active');
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            });
+        });
+
+        // --- SMOOTH SCROLL ---
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    window.scrollTo({
+                        top: target.getBoundingClientRect().top + window.scrollY - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // --- FLOATING PARTICLES (React Bits Particles inspired) ---
+        (function() {
+            const container = document.getElementById('heroParticles');
+            if (!container) return;
+            const count = 18;
+            for (let i = 0; i < count; i++) {
+                const span = document.createElement('span');
+                const size = Math.random() * 3 + 1.5;
+                span.style.width = size + 'px';
+                span.style.height = size + 'px';
+                span.style.left = Math.random() * 100 + '%';
+                span.style.top = (60 + Math.random() * 40) + '%';
+                span.style.animationDuration = (12 + Math.random() * 20) + 's';
+                span.style.animationDelay = (Math.random() * 15) + 's';
+                span.style.opacity = (0.15 + Math.random() * 0.25).toString();
+                container.appendChild(span);
+            }
+        })();
+
+        // --- COUNTER ANIMATION ---
+        (function() {
+            const counters = document.querySelectorAll('[data-count]');
+            const counterObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const target = parseFloat(el.dataset.count);
+                        const prefix = el.dataset.prefix || '';
+                        const suffix = el.dataset.suffix || '';
+                        const isDecimal = el.dataset.decimal === 'true';
+                        const duration = 1800;
+                        const startTime = performance.now();
+
+                        function update(currentTime) {
+                            const elapsed = currentTime - startTime;
+                            const progress = Math.min(elapsed / duration, 1);
+                            const eased = 1 - Math.pow(1 - progress, 3);
+                            const current = target * eased;
+
+                            if (isDecimal) {
+                                el.textContent = prefix + current.toFixed(1) + suffix;
+                            } else {
+                                el.textContent = prefix + Math.floor(current) + suffix;
+                            }
+
+                            if (progress < 1) {
+                                requestAnimationFrame(update);
+                            } else {
+                                el.textContent = prefix + (isDecimal ? target.toFixed(1) : target) + suffix;
+                            }
+                        }
+                        requestAnimationFrame(update);
+                        counterObserver.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counters.forEach(el => counterObserver.observe(el));
+        })();
+
+        // --- SPOTLIGHT CARD HOVER (React Bits SpotlightCard inspired) ---
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+                card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+            });
+        });
+    </script>
+</body>
 </html>
