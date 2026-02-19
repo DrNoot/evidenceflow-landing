@@ -7,12 +7,12 @@ import FadeIn from './components/ui/FadeIn';
 
 /* ====== LINKS ====== */
 const LINKS = {
-  freeTrial: 'https://dastray.gumroad.com/l/zltdxi',
-  membership: 'https://dastray.gumroad.com/l/gajuaj',
-  reloadPacks: 'https://dastray.gumroad.com/l/ytrgjp',
+  stripe: 'https://buy.stripe.com/00w00k0kw0Hvc9G0aR28800',
   guo2024: 'https://doi.org/10.1186/s13643-024-02575-4',
   kellermeyer2024: 'https://doi.org/10.1002/jrsm.1691',
-  contact: 'mailto:ogrivenmain@gmail.com',
+  astrayFatigue: 'https://pubmed.ncbi.nlm.nih.gov/41706215/',
+  astraySocialMedia: 'https://doi.org/10.1007/s00520-025-10292-4',
+  contact: 'mailto:evidenceflowofficial@gmail.com',
 };
 
 /* ====== NAV ====== */
@@ -63,9 +63,7 @@ function Navbar() {
             </a>
           ))}
           <a
-            href={LINKS.freeTrial}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#pricing"
             className="px-4 py-2 rounded-lg bg-[var(--color-teal)] text-[var(--color-navy)] text-sm font-semibold no-underline hover:bg-[var(--color-teal-light)] transition-colors"
           >
             Start Free
@@ -100,9 +98,8 @@ function Navbar() {
             </a>
           ))}
           <a
-            href={LINKS.freeTrial}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#pricing"
+            onClick={() => setMenuOpen(false)}
             className="mt-2 px-4 py-2.5 rounded-lg bg-[var(--color-teal)] text-[var(--color-navy)] text-sm font-semibold no-underline text-center"
           >
             Start Free
@@ -159,13 +156,13 @@ function Hero() {
             <div className="flex flex-wrap items-center justify-center gap-4 mt-10">
               <StarBorder
                 as="a"
-                href={LINKS.freeTrial}
+                href={LINKS.stripe}
                 target="_blank"
                 rel="noopener noreferrer"
                 color="rgba(0, 200, 180, 0.5)"
                 speed="4s"
               >
-                Screen 100 Papers Free
+                Get Started for $29
               </StarBorder>
               <a
                 href="#how-it-works"
@@ -196,7 +193,7 @@ function Hero() {
                 </div>
                 <div className="app-mockup__sidebar-section">
                   <div className="app-mockup__sidebar-label">License</div>
-                  <div className="app-mockup__sidebar-badge">Pro</div>
+                  <div className="app-mockup__sidebar-badge">Single Review</div>
                 </div>
                 <div className="app-mockup__sidebar-section">
                   <div className="app-mockup__sidebar-label">Protocol</div>
@@ -276,7 +273,7 @@ function Hero() {
             {[
               ['240x', 'Faster than manual'],
               ['99.5%', 'Sensitivity (recall)'],
-              ['$49', 'Per month, 5,000 papers'],
+              ['$29', 'Per review, unlimited papers'],
             ].map(([num, label]) => (
               <div
                 key={num}
@@ -481,7 +478,7 @@ function Benchmarks() {
   const rows = [
     { metric: 'Screening Speed', ai: '6,000+ papers/hr', manual: '~25 papers/hr', winner: '240x faster' },
     { metric: 'Sensitivity (Recall)', ai: '99.5%', manual: '~92-95%', winner: 'Fewer missed' },
-    { metric: 'Cost per Review', ai: 'From $49/mo', manual: '$2,000-4,000+', winner: 'Save thousands' },
+    { metric: 'Cost per Review', ai: '$29 per review', manual: '$2,000-4,000+', winner: 'Save thousands' },
     { metric: 'Fatigue Degradation', ai: 'None', manual: 'Significant after 2-3hrs', winner: 'Consistent' },
     { metric: 'Audit Trail', ai: 'Full reasoning per paper', manual: 'Rarely documented', winner: 'Transparent' },
     { metric: 'Availability', ai: '24/7, instant', manual: 'Working hours only', winner: 'Always on' },
@@ -537,40 +534,94 @@ function Benchmarks() {
   );
 }
 
-/* ====== PRICING ====== */
-function Pricing() {
-  const tiers = [
+/* ====== FOUNDER STORY ====== */
+function FounderStory() {
+  return (
+    <section className="py-24 px-6 max-w-4xl mx-auto text-center">
+      <FadeIn>
+        <p className="section-label">Origin Story</p>
+        <h2 className="section-heading">I screened thousands of papers. <em>Manually.</em></h2>
+        <div className="text-left max-w-[700px] mx-auto">
+          <p className="text-[var(--color-cream-muted)] text-[0.9375rem] leading-relaxed mb-8">
+            I am Daniel Astray, a researcher with two published reviews in
+            Supportive Care in Cancer. Across those projects, I spent over
+            1,000 hours reading titles and abstracts, including for studies
+            that never made it to publication. The screening phase is the
+            most time-consuming and least scientific part of the review
+            process. I built EvidenceFlow so you can focus on the research
+            that actually matters.
+          </p>
+          <div className="font-[var(--font-mono)] text-xs text-[var(--color-cream-muted)] leading-relaxed space-y-3">
+            <p className="m-0">
+              1. Astray D, et al. "Cancer-related fatigue in cancer survivors:
+              an updated clinical practice review." <em>Support Care Cancer.</em> 2026.{' '}
+              <a href={LINKS.astrayFatigue} target="_blank" rel="noopener noreferrer" className="text-[var(--color-teal)] no-underline border-b border-[var(--color-teal)]/30 hover:border-[var(--color-teal)]">
+                PubMed
+              </a>
+            </p>
+            <p className="m-0">
+              2. Astray D, et al. "The use of social media interventions for
+              breast cancer survivors: a narrative review." <em>Support Care Cancer.</em> 2025.{' '}
+              <a href={LINKS.astraySocialMedia} target="_blank" rel="noopener noreferrer" className="text-[var(--color-teal)] no-underline border-b border-[var(--color-teal)]/30 hover:border-[var(--color-teal)]">
+                DOI
+              </a>
+            </p>
+          </div>
+        </div>
+      </FadeIn>
+    </section>
+  );
+}
+
+/* ====== PERSONAS ====== */
+function Personas() {
+  const personas = [
     {
-      name: 'Free Trial',
-      price: '$0',
-      period: 'no credit card',
-      desc: 'Test on 100 papers from your review. See the quality of AI screening decisions before you commit.',
-      features: ['100 papers included', 'Full Covidence integration', 'Tiered AI screening', 'Complete audit trail'],
-      cta: 'Start Free Trial',
-      href: LINKS.freeTrial,
-      highlighted: false,
+      title: 'For PhD Students',
+      desc: 'You have 8,000 papers in your search results and a conference deadline in three months. EvidenceFlow screens your entire queue in an afternoon, so you can spend your time on full-text review and synthesis instead of endless title-abstract screening.',
     },
     {
-      name: 'Starter',
-      price: '$49',
-      period: '/month',
-      desc: 'Covers most systematic reviews. 3,000 to 5,000 papers is typical. One subscription, one complete review.',
-      features: ['5,000 papers/month', 'Full Covidence integration', 'Tiered AI screening', 'PRISMA-compliant exports', 'Email support'],
-      cta: 'Start Screening',
-      href: LINKS.membership,
-      highlighted: true,
+      title: 'For Review Teams',
+      desc: 'Your team needs a second reviewer but the budget does not stretch to another hire. EvidenceFlow serves as Reviewer #2 with a complete audit trail. Every decision is logged with AI reasoning and confidence scores, ready for your methods section.',
     },
     {
-      name: 'Pro',
-      price: '$149',
-      period: '/month',
-      desc: 'Multiple concurrent reviews or umbrella reviews with 10,000+ papers. Built for high-volume research labs.',
-      features: ['50,000 papers/month', 'Everything in Starter', 'Priority AI escalation', 'Priority support', 'Reload packs available'],
-      cta: 'Go Pro',
-      href: LINKS.membership,
-      highlighted: false,
+      title: 'For Supervisors',
+      desc: 'Your students are stuck in the screening phase and the publication timeline is slipping. Give them a tool that handles the mechanical work so they can focus on the intellectual contribution: interpreting findings, writing, and getting published.',
     },
   ];
+
+  return (
+    <section className="py-24 md:py-32">
+      <div className="max-w-6xl mx-auto px-6">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <div className="section-label">Who It Helps</div>
+            <h2 className="section-heading">Built for researchers at <em>every stage.</em></h2>
+          </div>
+        </FadeIn>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {personas.map((p, i) => (
+            <FadeIn key={p.title} delay={i * 0.15}>
+              <SpotlightCard className="p-8 h-full">
+                <h3 className="text-lg font-semibold text-[var(--color-cream)] mb-3 font-[var(--font-body)]">{p.title}</h3>
+                <p className="text-[var(--color-cream-muted)] text-[0.9375rem] leading-relaxed m-0">{p.desc}</p>
+              </SpotlightCard>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ====== PRICING ====== */
+function Pricing() {
+  const checkIcon = (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" className="mt-0.5 flex-shrink-0">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
 
   return (
     <section id="pricing" className="py-24 md:py-32">
@@ -578,84 +629,111 @@ function Pricing() {
         <FadeIn>
           <div className="text-center mb-4">
             <div className="section-label">Pricing</div>
-            <h2 className="section-heading">Get to publication <em>faster.</em></h2>
+            <h2 className="section-heading">One review. <em>One payment.</em></h2>
             <p className="text-[var(--color-cream-muted)] max-w-xl mx-auto">
-              Finish your screening in an afternoon instead of weeks. Affordable plans for students and research teams. Free trial, no credit card required.
+              Simple pricing with no subscriptions and no paper limits. Pay once, screen your entire review.
             </p>
           </div>
         </FadeIn>
 
         <div className="grid md:grid-cols-3 gap-6 mt-12">
-          {tiers.map((tier, i) => (
-            <FadeIn key={tier.name} delay={i * 0.1}>
-              <div
-                className={`rounded-2xl p-8 h-full flex flex-col ${
-                  tier.highlighted
-                    ? 'bg-[var(--color-navy-light)] border-2 border-[var(--color-teal)]/30 relative'
-                    : 'bg-[var(--color-navy-light)] border border-[rgba(240,237,230,0.06)]'
-                }`}
-              >
-                {tier.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--color-teal)] text-[var(--color-navy)] text-xs font-semibold">
-                    Most Popular
-                  </div>
-                )}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-[var(--color-cream)] font-[var(--font-body)]">{tier.name}</h3>
-                  <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-4xl font-semibold text-[var(--color-cream)] font-[var(--font-display)]">{tier.price}</span>
-                    <span className="text-sm text-[var(--color-cream-muted)]">{tier.period}</span>
-                  </div>
-                  <p className="mt-3 text-sm text-[var(--color-cream-muted)] leading-relaxed">{tier.desc}</p>
+          {/* Free Tier */}
+          <FadeIn delay={0}>
+            <div className="rounded-2xl p-8 h-full flex flex-col bg-[var(--color-navy-light)] border border-[rgba(240,237,230,0.06)]">
+              <div className="mb-6">
+                <div className="font-[var(--font-mono)] text-xs text-[var(--color-teal)]/70 uppercase tracking-widest mb-2">For Curious Researchers</div>
+                <h3 className="text-lg font-semibold text-[var(--color-cream)] font-[var(--font-body)]">Free</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-4xl font-semibold text-[var(--color-cream)] font-[var(--font-display)]">$0</span>
+                  <span className="text-sm text-[var(--color-cream-muted)]">forever</span>
                 </div>
-
-                <ul className="space-y-3 mb-8 flex-1 list-none p-0 m-0">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-cream-muted)]">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-teal)" strokeWidth="2" className="mt-0.5 flex-shrink-0">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                {tier.highlighted ? (
-                  <StarBorder
-                    as="a"
-                    href={tier.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    color="rgba(0, 200, 180, 0.5)"
-                    speed="4s"
-                    style={{ display: 'flex', width: '100%', justifyContent: 'center' }}
-                  >
-                    {tier.cta}
-                  </StarBorder>
-                ) : (
-                  <a
-                    href={tier.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block text-center px-6 py-3.5 rounded-xl border border-[rgba(240,237,230,0.12)] text-[var(--color-cream)] text-sm font-medium no-underline hover:border-[var(--color-teal)]/30 transition-colors"
-                  >
-                    {tier.cta}
-                  </a>
-                )}
+                <p className="mt-3 text-sm text-[var(--color-cream-muted)] leading-relaxed">Screen 100 papers on any review. No credit card needed.</p>
               </div>
-            </FadeIn>
-          ))}
-        </div>
+              <ul className="space-y-3 mb-8 flex-1 list-none p-0 m-0">
+                {['100 papers, no time limit', 'Full Covidence integration', 'Tiered AI screening', 'Complete audit trail'].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-cream-muted)]">
+                    {checkIcon}
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="#pricing"
+                className="block text-center px-6 py-3.5 rounded-xl border border-[rgba(240,237,230,0.12)] text-[var(--color-cream)] text-sm font-medium no-underline hover:border-[var(--color-teal)]/30 transition-colors"
+              >
+                Start Free
+              </a>
+            </div>
+          </FadeIn>
 
-        <FadeIn delay={0.3}>
-          <p className="text-center text-sm text-[var(--color-cream-muted)] mt-8">
-            Need more papers mid-cycle?{' '}
-            <a href={LINKS.reloadPacks} target="_blank" rel="noopener noreferrer" className="text-[var(--color-teal)] no-underline border-b border-[var(--color-teal)]/30 hover:border-[var(--color-teal)]">
-              Reload Packs
-            </a>{' '}
-            are available for active subscribers.
-          </p>
-        </FadeIn>
+          {/* Single Review Tier (Highlighted) */}
+          <FadeIn delay={0.1}>
+            <div className="rounded-2xl p-8 h-full flex flex-col bg-[var(--color-navy-light)] border-2 border-[var(--color-teal)]/30 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--color-teal)] text-[var(--color-navy)] text-xs font-semibold">
+                Most Popular
+              </div>
+              <div className="mb-6">
+                <div className="font-[var(--font-mono)] text-xs text-[var(--color-teal)]/70 uppercase tracking-widest mb-2">For Individual Reviews</div>
+                <h3 className="text-lg font-semibold text-[var(--color-cream)] font-[var(--font-body)]">Single Review</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-4xl font-semibold text-[var(--color-cream)] font-[var(--font-display)]">$29</span>
+                  <span className="text-sm text-[var(--color-cream-muted)]">one-time</span>
+                </div>
+                <p className="mt-3 text-sm text-[var(--color-cream-muted)] leading-relaxed">Unlimited papers for one systematic review. One payment, no subscription.</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1 list-none p-0 m-0">
+                {['Unlimited papers', 'Bound to 1 Covidence review', 'Full Covidence integration', 'PRISMA-compliant exports', 'Email support'].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-cream-muted)]">
+                    {checkIcon}
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <StarBorder
+                as="a"
+                href={LINKS.stripe}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="rgba(0, 200, 180, 0.5)"
+                speed="4s"
+                style={{ display: 'flex', width: '100%', justifyContent: 'center' }}
+              >
+                Buy Now
+              </StarBorder>
+              <p className="text-center text-xs text-[var(--color-cream-muted)]/60 mt-4 m-0">
+                Your key binds to one Covidence review ID on first use.
+              </p>
+            </div>
+          </FadeIn>
+
+          {/* Enterprise Tier */}
+          <FadeIn delay={0.2}>
+            <div className="rounded-2xl p-8 h-full flex flex-col bg-[var(--color-navy-light)] border border-[rgba(240,237,230,0.06)]">
+              <div className="mb-6">
+                <div className="font-[var(--font-mono)] text-xs text-[var(--color-teal)]/70 uppercase tracking-widest mb-2">For Labs & Institutions</div>
+                <h3 className="text-lg font-semibold text-[var(--color-cream)] font-[var(--font-body)]">Enterprise</h3>
+                <div className="mt-3">
+                  <span className="text-4xl font-semibold text-[var(--color-cream)] font-[var(--font-display)]">Contact Us</span>
+                </div>
+                <p className="mt-3 text-sm text-[var(--color-cream-muted)] leading-relaxed">Bulk keys for research labs and university programs.</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1 list-none p-0 m-0">
+                {['Volume key licensing', 'Each student gets own key', 'Priority support', 'Custom onboarding', 'Invoice billing'].map((f) => (
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-cream-muted)]">
+                    {checkIcon}
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={LINKS.contact}
+                className="block text-center px-6 py-3.5 rounded-xl border border-[rgba(240,237,230,0.12)] text-[var(--color-cream)] text-sm font-medium no-underline hover:border-[var(--color-teal)]/30 transition-colors"
+              >
+                Get in Touch
+              </a>
+            </div>
+          </FadeIn>
+        </div>
       </div>
     </section>
   );
@@ -720,9 +798,8 @@ function FAQ() {
               <p>The core principle: <strong>when in doubt, include.</strong> This is the same conservative approach recommended by Cochrane methodology guidelines.</p>
             </FAQItem>
 
-            <FAQItem question="How does the subscription pricing work?">
-              <p>The <strong>Free Trial</strong> includes 100 papers at no cost with no credit card required. The <strong>Starter plan</strong> ($49/month) includes 5,000 papers per month, sufficient for most individual reviews. The <strong>Pro plan</strong> ($149/month) includes 50,000 papers per month for labs running multiple concurrent reviews.</p>
-              <p>If you run out of papers mid-month, <a href={LINKS.reloadPacks} target="_blank" rel="noopener noreferrer" className="text-[var(--color-teal)] no-underline border-b border-[var(--color-teal)]/30">Reload Packs</a> are available. You can cancel at any time.</p>
+            <FAQItem question="How does pricing work?">
+              <p>The Free tier includes 100 papers at no cost with no credit card required. The Single Review plan ($29 one-time) gives you unlimited papers for one systematic review. Your license key binds to a single Covidence review ID the first time you use it, and you can screen as many papers as that review requires. If you are running multiple reviews, you purchase a separate key for each one. For research labs or university programs needing bulk keys, contact us for enterprise pricing.</p>
             </FAQItem>
 
             <FAQItem question="Is my review data secure?">
@@ -753,18 +830,24 @@ function BottomCTA() {
             <span className="text-[var(--color-teal)] italic">Screen them today.</span>
           </h2>
           <p className="text-[var(--color-cream-muted)] mb-8">
-            100 papers free. No credit card. Full audit trail included.
+            One review. Unlimited papers. Full audit trail included.
           </p>
           <StarBorder
             as="a"
-            href={LINKS.freeTrial}
+            href={LINKS.stripe}
             target="_blank"
             rel="noopener noreferrer"
             color="rgba(0, 200, 180, 0.5)"
             speed="4s"
           >
-            Screen 100 Papers Free
+            Get Started for $29
           </StarBorder>
+          <p className="text-sm text-[var(--color-cream-muted)]/60 mt-4">
+            or{' '}
+            <a href="#pricing" className="text-[var(--color-teal)] no-underline border-b border-[var(--color-teal)]/30 hover:border-[var(--color-teal)]">
+              start with 100 papers free
+            </a>
+          </p>
         </FadeIn>
       </div>
     </section>
@@ -782,7 +865,6 @@ function Footer() {
         </div>
         <div className="flex items-center gap-6 text-sm text-[var(--color-cream-muted)]">
           <a href={LINKS.contact} className="no-underline text-[var(--color-cream-muted)] hover:text-[var(--color-cream)] transition-colors">Contact</a>
-          <a href={LINKS.freeTrial} target="_blank" rel="noopener noreferrer" className="no-underline text-[var(--color-cream-muted)] hover:text-[var(--color-cream)] transition-colors">Gumroad</a>
           <a href="#pricing" className="no-underline text-[var(--color-cream-muted)] hover:text-[var(--color-cream)] transition-colors">Pricing</a>
         </div>
         <span className="text-xs text-[var(--color-cream-muted)]/50">&copy; 2026 EvidenceFlow. All rights reserved.</span>
@@ -805,6 +887,10 @@ export default function App() {
       <Features />
       <div className="glass-divider" />
       <Benchmarks />
+      <div className="glass-divider" />
+      <FounderStory />
+      <div className="glass-divider" />
+      <Personas />
       <div className="glass-divider" />
       <Pricing />
       <div className="glass-divider" />
