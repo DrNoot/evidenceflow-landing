@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, type ReactNode } from 'react';
 import Aurora from './components/ui/Aurora';
 import BlurText from './components/ui/BlurText';
 import SpotlightCard from './components/ui/SpotlightCard';
-import StarBorder from './components/ui/StarBorder';
+
 import FadeIn from './components/ui/FadeIn';
 
 /* ====== LINKS ====== */
@@ -154,16 +154,14 @@ function Hero() {
 
           <FadeIn delay={1.1} duration={0.7}>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-10">
-              <StarBorder
-                as="a"
+              <a
                 href={LINKS.stripe}
                 target="_blank"
                 rel="noopener noreferrer"
-                color="rgba(0, 200, 180, 0.5)"
-                speed="4s"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-[var(--color-teal)] text-[var(--color-navy)] text-base font-semibold no-underline hover:brightness-110 transition-all"
               >
                 Get Started for $29
-              </StarBorder>
+              </a>
               <a
                 href="#how-it-works"
                 className="px-6 py-3.5 rounded-xl bg-[rgba(240,237,230,0.08)] backdrop-blur-sm border border-[rgba(240,237,230,0.15)] text-[var(--color-cream)] text-base font-medium no-underline hover:bg-[rgba(240,237,230,0.14)] hover:border-[rgba(240,237,230,0.25)] transition-all"
@@ -577,12 +575,12 @@ function FounderStory() {
 function Personas() {
   const personas = [
     {
-      title: 'For PhD Students',
-      desc: 'You have 8,000 papers in your search results and a conference deadline in three months. EvidenceFlow screens your entire queue in an afternoon, so you can spend your time on full-text review and synthesis instead of endless title-abstract screening.',
+      title: 'For Students & Researchers',
+      desc: 'You have 8,000 papers and a deadline approaching. Whether it is your first publication or your tenth, EvidenceFlow screens your entire queue in an afternoon so you can focus on full-text review and writing instead of endless title-abstract screening.',
     },
     {
       title: 'For Review Teams',
-      desc: 'Your team needs a second reviewer but the budget does not stretch to another hire. EvidenceFlow serves as Reviewer #2 with a complete audit trail. Every decision is logged with AI reasoning and confidence scores, ready for your methods section.',
+      desc: 'Screening thousands of papers manually takes weeks. EvidenceFlow helps your team move faster by flagging the most relevant studies up front. Every AI decision is logged with reasoning and confidence scores, giving your reviewers a clear starting point and a complete audit trail.',
     },
     {
       title: 'For Supervisors',
@@ -669,8 +667,8 @@ function Pricing() {
           {/* Single Review Tier (Highlighted) */}
           <FadeIn delay={0.1}>
             <div className="rounded-2xl p-8 h-full flex flex-col bg-[var(--color-navy-light)] border-2 border-[var(--color-teal)]/30 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--color-teal)] text-[var(--color-navy)] text-xs font-semibold">
-                Most Popular
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[var(--color-teal)] text-[var(--color-navy)] text-xs font-semibold whitespace-nowrap">
+                Founding 100
               </div>
               <div className="mb-6">
                 <div className="font-[var(--font-mono)] text-xs text-[var(--color-teal)]/70 uppercase tracking-widest mb-2">For Individual Reviews</div>
@@ -689,17 +687,14 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <StarBorder
-                as="a"
+              <a
                 href={LINKS.stripe}
                 target="_blank"
                 rel="noopener noreferrer"
-                color="rgba(0, 200, 180, 0.5)"
-                speed="4s"
-                style={{ display: 'flex', width: '100%', justifyContent: 'center' }}
+                className="block text-center px-6 py-3.5 rounded-xl bg-[var(--color-teal)] text-[var(--color-navy)] text-sm font-semibold no-underline hover:brightness-110 transition-all"
               >
                 Buy Now
-              </StarBorder>
+              </a>
             </div>
           </FadeIn>
 
@@ -715,7 +710,7 @@ function Pricing() {
                 <p className="mt-3 text-sm text-[var(--color-cream-muted)] leading-relaxed">Bulk keys for research labs and university programs.</p>
               </div>
               <ul className="space-y-3 mb-8 flex-1 list-none p-0 m-0">
-                {['Volume key licensing', 'Each student gets own key', 'Priority support', 'Custom onboarding', 'Invoice billing'].map((f) => (
+                {['Volume key licensing', 'Each reviewer gets own key', 'Priority support', 'Custom onboarding', 'Invoice billing'].map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-cream-muted)]">
                     {checkIcon}
                     {f}
@@ -829,16 +824,14 @@ function BottomCTA() {
           <p className="text-[var(--color-cream-muted)] mb-8">
             One review. Unlimited papers. Full audit trail included.
           </p>
-          <StarBorder
-            as="a"
+          <a
             href={LINKS.stripe}
             target="_blank"
             rel="noopener noreferrer"
-            color="rgba(0, 200, 180, 0.5)"
-            speed="4s"
+            className="inline-flex items-center justify-center px-7 py-3.5 rounded-xl bg-[var(--color-teal)] text-[var(--color-navy)] text-base font-semibold no-underline hover:brightness-110 transition-all"
           >
             Get Started for $29
-          </StarBorder>
+          </a>
           <p className="text-sm text-[var(--color-cream-muted)]/60 mt-4">
             or{' '}
             <a href="#pricing" className="text-[var(--color-teal)] no-underline border-b border-[var(--color-teal)]/30 hover:border-[var(--color-teal)]">

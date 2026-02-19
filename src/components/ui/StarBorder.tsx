@@ -25,12 +25,7 @@ export default function StarBorder({
   return (
     <Component
       className={`star-border ${className}`}
-      style={{
-        position: 'relative',
-        display: 'inline-flex',
-        overflow: 'hidden',
-        ...style,
-      }}
+      style={style}
       {...props}
     >
       <div

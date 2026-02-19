@@ -71,12 +71,20 @@ body {
 
 /* StarBorder */
 .star-border {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
   border-radius: 12px;
   border: none;
   cursor: pointer;
   font-family: inherit;
   background: transparent;
   padding: 2px;
+  text-decoration: none;
+}
+.star-border.w-full {
+  display: flex;
+  width: 100%;
 }
 .star-border__content {
   position: relative;
