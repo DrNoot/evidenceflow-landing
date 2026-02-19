@@ -700,9 +700,6 @@ function Pricing() {
               >
                 Buy Now
               </StarBorder>
-              <p className="text-center text-xs text-[var(--color-cream-muted)]/60 mt-4 m-0">
-                Your key binds to one Covidence review ID on first use.
-              </p>
             </div>
           </FadeIn>
 

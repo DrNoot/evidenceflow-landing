@@ -76,6 +76,7 @@ body {
   cursor: pointer;
   font-family: inherit;
   background: transparent;
+  padding: 2px;
 }
 .star-border__content {
   position: relative;
