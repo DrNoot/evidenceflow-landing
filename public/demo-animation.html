@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<!--
+  EvidenceFlow Animated Product Demo
+  Self-contained GSAP animation showing the full app workflow.
+
+  Embed on landing page:
+    <iframe src="demo-animation.html" width="960" height="600"
+            style="border:none;border-radius:12px" loading="lazy"></iframe>
+
+  Or replace the terminal-demo div in index.html with the iframe.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvidenceFlow Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy: #0B1628;
+  --navy-light: #111E33;
+  --navy-mid: #162540;
+  --teal: #00C8B4;
+  --teal-bright: #00E8D0;
+  --teal-dim: rgba(0, 200, 180, 0.12);
+  --teal-glow: rgba(0, 200, 180, 0.35);
+  --cream: #F0EDE6;
+  --slate: #8A9BB5;
+  --success: #10B981;
+  --error: #EF4444;
+  --warning: #F59E0B;
+  --font-display: 'DM Serif Display', serif;
+  --font-body: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background: var(--navy);
+  font-family: var(--font-body);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.demo-container {
+  width: 960px;
+  height: 600px;
+  position: relative;
+}
+
+/* ===== BROWSER FRAME ===== */
+.browser-frame {
+  width: 100%;
+  height: 100%;
+  background: var(--navy);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(240, 237, 230, 0.06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.browser-chrome {
+  background: var(--navy-light);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(240, 237, 230, 0.06);
+}
+
+.browser-dots {
+  display: flex;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot-red { background: #FF5F57; }
+.dot-yellow { background: #FFBD2E; }
+.dot-green { background: #28C840; }
+
+.browser-url {
+  background: var(--navy-mid);
+  border-radius: 6px;
+  padding: 7px 14px;
+  color: var(--slate);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.url-lock {
+  color: var(--teal);
+  font-size: 11px;
+}
+
+/* ===== APP LAYOUT ===== */
+.app-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Sidebar */
+.app-sidebar {
+  width: 220px;
+  background: var(--navy-light);
+  padding: 20px 16px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(240, 237, 230, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-logo {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--cream);
+  letter-spacing: -0.02em;
+}
+
+.sidebar-caption {
+  font-size: 10px;
+  color: var(--slate);
+  margin-top: -12px;
+  line-height: 1.4;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: rgba(240, 237, 230, 0.08);
+}
+
+.sidebar-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+
+.sidebar-value {
+  font-size: 12px;
+  color: var(--cream);
+  margin-top: -10px;
+  line-height: 1.5;
+}
+
+.license-badge {
+  display: inline-block;
+  background: var(--teal);
+  color: var(--navy);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-review {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--cream);
+  font-weight: 500;
+}
+
+/* ===== MAIN CONTENT ===== */
+.app-main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  padding: 28px 32px;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scene-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--cream);
+  margin-bottom: 20px;
+}
+
+/* ===== SCENE 1: LICENSE ===== */
+.license-scene .welcome-text {
+  font-size: 13px;
+  color: var(--slate);
+  margin-bottom: 24px;
+  line-height: 1.7;
+  max-width: 440px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.text-input {
+  width: 100%;
+  max-width: 420px;
+  background: var(--navy-mid);
+  border: 1px solid rgba(240, 237, 230, 0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.text-input.focused {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px rgba(0, 200, 180, 0.2);
+}
+
+.text-input-value {
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: var(--teal);
+  color: var(--navy);
+  border: none;
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid rgba(240, 237, 230, 0.15);
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.license-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  opacity: 0;
+}
+
+.success-icon {
+  width: 20px;
+  height: 20px;
+  background: var(--success);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.success-text {
+  font-size: 13px;
+  color: var(--success);
+  font-weight: 500;
+}
+
+/* Pricing cards */
+.pricing-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+  max-width: 420px;
+}
+
+.pricing-card {
+  flex: 1;
+  background: var(--navy-mid);
+  border: 1px solid rgba(240, 237, 230, 0.06);
+  border-radius: 10px;
+  padding: 16px;
+  opacity: 0;
+}
+
+.pricing-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.pricing-card-price {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.pricing-card-desc {
+  font-size: 10px;
+  color: var(--slate);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ===== SCENE 2: PROTOCOL ===== */
+.protocol-scene .criteria-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.criteria-column {
+  opacity: 0;
+}
+
+.criteria-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.criteria-header.include { color: var(--success); }
+.criteria-header.exclude { color: var(--error); }
+
+.criteria-item {
+  background: var(--navy-mid);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--cream);
+  margin-bottom: 6px;
+  border-left: 3px solid transparent;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.criteria-item.include-item { border-left-color: var(--success); }
+.criteria-item.exclude-item { border-left-color: var(--error); }
+
+.protocol-title-input {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 16px;
+}
+
+.picos-section {
+  background: var(--navy-mid);
+  border: 1px solid rgba(240, 237, 230, 0.06);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  opacity: 0;
+}
+
+.picos-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.picos-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.picos-item {
+  text-align: center;
+}
+
+.picos-letter {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.picos-text {
+  font-size: 9px;
+  color: var(--slate);
+  margin-top: 2px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+/* ===== SCENE 3: SCREENING ===== */
+.screening-scene .metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  background: var(--navy-light);
+  border-radius: 8px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--teal);
+  opacity: 0;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.metric-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.metric-card.included { border-left-color: var(--success); }
+.metric-card.excluded { border-left-color: var(--error); }
+.metric-card.maybe { border-left-color: var(--warning); }
+
+.progress-section {
+  margin-bottom: 16px;
+}
+
+.progress-label {
+  font-size: 11px;
+  color: var(--slate);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 200, 180, 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--teal-bright));
+  border-radius: 3px;
+  width: 0%;
+}
+
+.papers-feed {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.paper-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background: var(--navy-mid);
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.paper-title {
+  font-size: 11px;
+  color: var(--cream);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 12px;
+}
+
+.decision-badge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.badge-include {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.badge-exclude {
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.badge-maybe {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.15);
+}
+
+/* ===== SCENE 4: RESULTS ===== */
+.results-scene .results-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.results-chart-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.donut-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+
+.donut-svg {
+  width: 160px;
+  height: 160px;
+  transform: rotate(-90deg);
+}
+
+.donut-ring {
+  fill: none;
+  stroke-width: 20;
+}
+
+.donut-bg { stroke: var(--navy-mid); }
+.donut-include { stroke: var(--success); }
+.donut-exclude { stroke: var(--error); }
+.donut-maybe { stroke: var(--warning); }
+
+.donut-center-text {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.results-table {
+  flex: 1;
+  opacity: 0;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 8px 12px;
+  background: var(--navy-mid);
+  border-radius: 6px 6px 0 0;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 8px 12px;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(240, 237, 230, 0.04);
+  opacity: 0;
+}
+
+.table-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.confidence-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--teal);
+}
+
+.export-row {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.btn-export {
+  background: transparent;
+  color: var(--teal);
+  border: 1px solid var(--teal);
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-export-icon {
+  font-size: 14px;
+}
+
+/* ===== SCENE INDICATOR ===== */
+.scene-indicator {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(240, 237, 230, 0.2);
+  transition: all 0.4s;
+}
+
+.indicator-dot.active {
+  background: var(--teal);
+  width: 20px;
+  border-radius: 3px;
+}
+
+/* ===== AMBIENT GLOW ===== */
+.ambient-glow {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 200, 180, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== TYPING CURSOR ===== */
+.text-input-value::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 15px;
+  background: var(--teal);
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s step-end infinite;
+  opacity: 0;
+}
+
+.text-input.typing .text-input-value::after {
+  opacity: 1;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== STEP LABEL ===== */
+.step-label {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--slate);
+  letter-spacing: 0.05em;
+  opacity: 0;
+  z-index: 5;
+}
+
+/* ===== SCREENING HEADER ===== */
+.screening-header {
+  font-size: 12px;
+  color: var(--slate);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.screening-header .batch-text {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--cream);
+}
+
+.screening-header .separator {
+  color: rgba(240, 237, 230, 0.2);
+}
+
+/* ===== SCENE TRANSITION ===== */
+.scene-transition-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--navy);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+</style>
+</head>
+<body>
+
+<div class="demo-container">
+  <div class="browser-frame">
+    <!-- Browser chrome -->
+    <div class="browser-chrome">
+      <div class="browser-dots">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+      </div>
+      <div class="browser-url">
+        <span class="url-lock">&#x1f512;</span>
+        <span>localhost:8501</span>
+      </div>
+    </div>
+
+    <!-- App layout -->
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <div class="app-sidebar">
+        <div class="sidebar-logo">EvidenceFlow</div>
+        <div class="sidebar-caption">AI-Assisted Systematic Review Screening</div>
+        <div class="sidebar-divider"></div>
+        <div>
+          <div class="sidebar-label">License</div>
+          <div class="sidebar-value">
+            <span class="license-badge" id="sidebar-license">Free Trial</span>
+          </div>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div>
+          <div class="sidebar-label">Protocol</div>
+          <div class="sidebar-value" id="sidebar-protocol" style="opacity:0.4">Not configured</div>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div>
+          <div class="sidebar-label">Review</div>
+          <div class="sidebar-value sidebar-review" id="sidebar-review" style="opacity:0.4">&mdash;</div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="app-main">
+        <div class="ambient-glow"></div>
+        <div class="step-label" id="step-label">Step 1 of 4</div>
+        <div class="scene-transition-overlay" id="scene-overlay"></div>
+
+        <!-- Scene 1: License -->
+        <div class="scene license-scene" id="scene-1">
+          <div class="scene-title">Welcome to EvidenceFlow</div>
+          <div class="welcome-text">Enter your license key to begin screening. Free trial includes 100 papers with full AI-assisted screening.</div>
+          <div class="input-group">
+            <div class="input-label">License Key</div>
+            <div class="text-input" id="license-input">
+              <span class="text-input-value" id="license-text"></span>
+            </div>
+          </div>
+          <div class="license-success" id="license-success">
+            <div class="success-icon">&#10003;</div>
+            <div class="success-text">License validated. Single Review, unlimited papers.</div>
+          </div>
+          <div class="pricing-row">
+            <div class="pricing-card" id="price-free">
+              <div class="pricing-card-title">Free Trial</div>
+              <div class="pricing-card-price">$0</div>
+              <div class="pricing-card-desc">100 papers, 14 days</div>
+            </div>
+            <div class="pricing-card" id="price-single">
+              <div class="pricing-card-title">Single Review</div>
+              <div class="pricing-card-price">$29</div>
+              <div class="pricing-card-desc">Unlimited papers, one review</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 2: Protocol -->
+        <div class="scene protocol-scene" id="scene-2">
+          <div class="scene-title">Build Your Screening Protocol</div>
+          <div class="input-group protocol-title-input">
+            <div class="input-label">Review Title</div>
+            <div class="text-input" id="protocol-input">
+              <span class="text-input-value" id="protocol-text"></span>
+            </div>
+          </div>
+          <div class="criteria-grid">
+            <div class="criteria-column" id="include-col">
+              <div class="criteria-header include">&#10003; Inclusion Criteria</div>
+              <div class="criteria-item include-item">Peer-reviewed empirical studies</div>
+              <div class="criteria-item include-item">Adult cancer survivors (18+)</div>
+              <div class="criteria-item include-item">Educational intervention for HCPs</div>
+              <div class="criteria-item include-item">Published 2010 or later</div>
+            </div>
+            <div class="criteria-column" id="exclude-col">
+              <div class="criteria-header exclude">&#10007; Exclusion Criteria</div>
+              <div class="criteria-item exclude-item">Pediatric populations only</div>
+              <div class="criteria-item exclude-item">Conference abstracts without full text</div>
+              <div class="criteria-item exclude-item">Non-English language studies</div>
+              <div class="criteria-item exclude-item">Case reports (n &lt; 5)</div>
+            </div>
+          </div>
+          <div class="picos-section" id="picos-section">
+            <div class="picos-label">PICOS Framework</div>
+            <div class="picos-grid">
+              <div class="picos-item"><div class="picos-letter">P</div><div class="picos-text">Cancer survivors</div></div>
+              <div class="picos-item"><div class="picos-letter">I</div><div class="picos-text">HCP curriculum</div></div>
+              <div class="picos-item"><div class="picos-letter">C</div><div class="picos-text">Standard care</div></div>
+              <div class="picos-item"><div class="picos-letter">O</div><div class="picos-text">Knowledge gain</div></div>
+              <div class="picos-item"><div class="picos-letter">S</div><div class="picos-text">RCT, cohort</div></div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-primary" id="confirm-protocol-btn">Confirm Protocol</button>
+          </div>
+        </div>
+
+        <!-- Scene 3: Screening -->
+        <div class="scene screening-scene" id="scene-3">
+          <div class="screening-header" id="screening-header">
+            <span class="batch-text">Batch 1 of 25</span>
+            <span class="separator">|</span>
+            <span>467 papers queued</span>
+            <span class="separator">|</span>
+            <span>Gemini Flash 2.5</span>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-card included">
+              <div class="metric-value" id="metric-included">0</div>
+              <div class="metric-label">Included</div>
+            </div>
+            <div class="metric-card excluded">
+              <div class="metric-value" id="metric-excluded">0</div>
+              <div class="metric-label">Excluded</div>
+            </div>
+            <div class="metric-card maybe">
+              <div class="metric-value" id="metric-maybe">0</div>
+              <div class="metric-label">Maybe</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="metric-time">0:00</div>
+              <div class="metric-label">Duration</div>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Screening Progress</span>
+              <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+          <div class="papers-feed" id="papers-feed">
+            <div class="paper-item" data-idx="0">
+              <span class="paper-title">Nurse-Led Follow-Up vs Regular Physician-Led Follow-Up...</span>
+              <span class="decision-badge badge-exclude">Exclude</span>
+            </div>
+            <div class="paper-item" data-idx="1">
+              <span class="paper-title">Mindfulness-Based Program for Cancer Survivorship Care...</span>
+              <span class="decision-badge badge-exclude">Exclude</span>
+            </div>
+            <div class="paper-item" data-idx="2">
+              <span class="paper-title">Training Oncology Nurses in Survivorship Transition Care...</span>
+              <span class="decision-badge badge-include">Include</span>
+            </div>
+            <div class="paper-item" data-idx="3">
+              <span class="paper-title">Quality of Life Among Breast Cancer Survivors: A Review...</span>
+              <span class="decision-badge badge-exclude">Exclude</span>
+            </div>
+            <div class="paper-item" data-idx="4">
+              <span class="paper-title">Interprofessional Education for Cancer Rehabilitation...</span>
+              <span class="decision-badge badge-include">Include</span>
+            </div>
+            <div class="paper-item" data-idx="5">
+              <span class="paper-title">Primary Care Provider Confidence in Cancer Follow-Up...</span>
+              <span class="decision-badge badge-maybe">Maybe</span>
+            </div>
+            <div class="paper-item" data-idx="6">
+              <span class="paper-title">Survivorship Care Plan Implementation: A Curriculum...</span>
+              <span class="decision-badge badge-include">Include</span>
+            </div>
+            <div class="paper-item" data-idx="7">
+              <span class="paper-title">Cross-Cultural Adaptation of Survivorship Guidelines...</span>
+              <span class="decision-badge badge-exclude">Exclude</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scene 4: Results -->
+        <div class="scene results-scene" id="scene-4">
+          <div class="scene-title">Screening Results</div>
+          <div class="results-metrics">
+            <div class="metric-card included">
+              <div class="metric-value" id="result-included">0</div>
+              <div class="metric-label">Included</div>
+            </div>
+            <div class="metric-card excluded">
+              <div class="metric-value" id="result-excluded">0</div>
+              <div class="metric-label">Excluded</div>
+            </div>
+            <div class="metric-card maybe">
+              <div class="metric-value" id="result-maybe">0</div>
+              <div class="metric-label">Maybe</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="result-total">0</div>
+              <div class="metric-label">Total</div>
+            </div>
+          </div>
+          <div class="results-chart-row">
+            <div class="donut-container" id="donut-container" style="position:relative">
+              <svg class="donut-svg" viewBox="0 0 120 120">
+                <circle class="donut-ring donut-bg" cx="60" cy="60" r="45"/>
+                <circle class="donut-ring donut-exclude" cx="60" cy="60" r="45" stroke-dasharray="282.74" stroke-dashoffset="282.74" id="ring-exclude"/>
+                <circle class="donut-ring donut-include" cx="60" cy="60" r="45" stroke-dasharray="282.74" stroke-dashoffset="282.74" id="ring-include"/>
+                <circle class="donut-ring donut-maybe" cx="60" cy="60" r="45" stroke-dasharray="282.74" stroke-dashoffset="282.74" id="ring-maybe"/>
+              </svg>
+              <div class="donut-center-text" id="donut-center">0</div>
+            </div>
+            <div class="results-table" id="results-table">
+              <div class="table-header">
+                <span>Paper</span>
+                <span>Decision</span>
+                <span>Confidence</span>
+              </div>
+              <div class="table-row">
+                <span class="paper-title">Training Oncology Nurses in Survivorship...</span>
+                <span><span class="decision-badge badge-include">Include</span></span>
+                <span class="confidence-text">0.94</span>
+              </div>
+              <div class="table-row">
+                <span class="paper-title">Interprofessional Education for Cancer...</span>
+                <span><span class="decision-badge badge-include">Include</span></span>
+                <span class="confidence-text">0.91</span>
+              </div>
+              <div class="table-row">
+                <span class="paper-title">Survivorship Care Plan Implementation...</span>
+                <span><span class="decision-badge badge-include">Include</span></span>
+                <span class="confidence-text">0.88</span>
+              </div>
+              <div class="table-row">
+                <span class="paper-title">Primary Care Provider Confidence...</span>
+                <span><span class="decision-badge badge-maybe">Maybe</span></span>
+                <span class="confidence-text">0.62</span>
+              </div>
+              <div class="table-row">
+                <span class="paper-title">Nurse-Led Follow-Up vs Regular...</span>
+                <span><span class="decision-badge badge-exclude">Exclude</span></span>
+                <span class="confidence-text">0.97</span>
+              </div>
+            </div>
+          </div>
+          <div class="export-row" id="export-row">
+            <button class="btn-export" id="btn-csv"><span class="btn-export-icon">&#8681;</span> Export CSV</button>
+            <button class="btn-export" id="btn-audit"><span class="btn-export-icon">&#8681;</span> Audit Report</button>
+            <button class="btn-export" id="btn-prisma"><span class="btn-export-icon">&#8681;</span> PRISMA Data</button>
+          </div>
+        </div>
+
+        <!-- Scene indicator dots -->
+        <div class="scene-indicator" id="scene-indicator">
+          <div class="indicator-dot active" data-scene="1"></div>
+          <div class="indicator-dot" data-scene="2"></div>
+          <div class="indicator-dot" data-scene="3"></div>
+          <div class="indicator-dot" data-scene="4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/TextPlugin.min.js"></script>
+<script>
+gsap.registerPlugin(TextPlugin);
+
+const CIRCUMFERENCE = 2 * Math.PI * 45; // donut ring circumference
+
+function setActiveIndicator(sceneNum) {
+  document.querySelectorAll('.indicator-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.scene === String(sceneNum));
+  });
+}
+
+function setStepLabel(step) {
+  const el = document.getElementById('step-label');
+  el.textContent = `Step ${step} of 4`;
+  gsap.to(el, { opacity: 0.6, duration: 0.3 });
+}
+
+function showCursor(inputId) {
+  document.getElementById(inputId).classList.add('typing');
+}
+
+function hideCursor(inputId) {
+  document.getElementById(inputId).classList.remove('typing');
+}
+
+function transitionScene(fromId, toId) {
+  const tl = gsap.timeline();
+  tl.to('#scene-overlay', { opacity: 0.6, duration: 0.25, ease: 'power2.in' })
+    .set(fromId, { opacity: 0 })
+    .set(toId, { opacity: 1 })
+    .to('#scene-overlay', { opacity: 0, duration: 0.35, ease: 'power2.out' });
+  return tl;
+}
+
+// ===== Scene 1: License Entry =====
+function sceneLicense() {
+  const tl = gsap.timeline();
+
+  tl.call(() => { setActiveIndicator(1); setStepLabel(1); })
+    .set('#scene-1', { opacity: 1 })
+    .fromTo('.license-scene .scene-title', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+    .fromTo('.license-scene .welcome-text', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2')
+    .fromTo('#price-free', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4 }, '-=0.1')
+    .fromTo('#price-single', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4 }, '-=0.2')
+
+    // Focus the input + show cursor
+    .to('#license-input', { borderColor: 'var(--teal)', boxShadow: '0 0 0 2px rgba(0, 200, 180, 0.2)', duration: 0.3 }, '+=0.3')
+    .call(() => showCursor('license-input'))
+
+    // Type the license key
+    .to('#license-text', { duration: 1.8, text: '7B95B0F3-ED794AF3-B86A3C33-CF20DF84', ease: 'none' })
+
+    // Hide cursor
+    .call(() => hideCursor('license-input'))
+
+    // Show success
+    .to('#license-success', { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.2')
+
+    // Update sidebar
+    .to('#sidebar-license', {
+      duration: 0.01,
+      onComplete: () => { document.getElementById('sidebar-license').textContent = 'Single Review'; }
+    }, '-=0.2')
+
+    // Hold
+    .to({}, { duration: 1.5 })
+
+    // Transition to next
+    .to('#step-label', { opacity: 0, duration: 0.2 })
+    .add(transitionScene('#scene-1', '#scene-2'));
+
+  return tl;
+}
+
+// ===== Scene 2: Protocol Config =====
+function sceneProtocol() {
+  const tl = gsap.timeline();
+
+  tl.call(() => { setActiveIndicator(2); setStepLabel(2); })
+    .fromTo('.protocol-scene .scene-title', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+
+    // Focus & type protocol title
+    .to('#protocol-input', { borderColor: 'var(--teal)', boxShadow: '0 0 0 2px rgba(0, 200, 180, 0.2)', duration: 0.3 })
+    .call(() => showCursor('protocol-input'))
+    .to('#protocol-text', { duration: 1.5, text: 'Adult Cancer Survivorship Curriculum for HCPs', ease: 'none' })
+    .call(() => hideCursor('protocol-input'))
+
+    // Update sidebar
+    .to('#sidebar-protocol', {
+      opacity: 1, duration: 0.3,
+      onComplete: () => {
+        document.getElementById('sidebar-protocol').textContent = 'Cancer Survivorship...';
+        document.getElementById('sidebar-review').textContent = '#555115';
+        document.getElementById('sidebar-review').style.opacity = '1';
+      }
+    })
+
+    // Animate inclusion criteria
+    .to('#include-col', { opacity: 1, duration: 0.3 }, '+=0.2')
+    .to('#include-col .criteria-item', { opacity: 1, x: 0, stagger: 0.12, duration: 0.3, ease: 'power2.out' })
+
+    // Animate exclusion criteria
+    .to('#exclude-col', { opacity: 1, duration: 0.3 }, '-=0.3')
+    .to('#exclude-col .criteria-item', { opacity: 1, x: 0, stagger: 0.12, duration: 0.3, ease: 'power2.out' })
+
+    // PICOS section
+    .to('#picos-section', { opacity: 1, duration: 0.4, ease: 'power2.out' }, '+=0.2')
+
+    // Confirm button glow
+    .to('#confirm-protocol-btn', { boxShadow: '0 0 20px rgba(0, 200, 180, 0.4)', duration: 0.3, yoyo: true, repeat: 1 }, '+=0.3')
+
+    // Hold
+    .to({}, { duration: 1 })
+
+    // Transition to screening
+    .to('#step-label', { opacity: 0, duration: 0.2 })
+    .add(transitionScene('#scene-2', '#scene-3'));
+
+  return tl;
+}
+
+// ===== Scene 3: Screening =====
+function sceneScreening() {
+  const tl = gsap.timeline();
+  const papers = document.querySelectorAll('.paper-item');
+
+  tl.call(() => { setActiveIndicator(3); setStepLabel(3); })
+
+    // Screening header
+    .fromTo('#screening-header', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' })
+
+    // Metric cards appear
+    .fromTo('.screening-scene .metric-card', { opacity: 0, y: 15 }, { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' })
+
+    // Progress bar starts
+    .fromTo('.progress-section', { opacity: 0 }, { opacity: 1, duration: 0.3 });
+
+  // Animate each paper appearing with counters updating
+  const decisions = [
+    { type: 'exclude', inc: 0, exc: 1, may: 0 },
+    { type: 'exclude', inc: 0, exc: 2, may: 0 },
+    { type: 'include', inc: 1, exc: 2, may: 0 },
+    { type: 'exclude', inc: 1, exc: 3, may: 0 },
+    { type: 'include', inc: 2, exc: 3, may: 0 },
+    { type: 'maybe',   inc: 2, exc: 3, may: 1 },
+    { type: 'include', inc: 3, exc: 3, may: 1 },
+    { type: 'exclude', inc: 3, exc: 4, may: 1 },
+  ];
+
+  const timeTexts = ['0:03', '0:07', '0:11', '0:14', '0:18', '0:22', '0:26', '0:30'];
+
+  decisions.forEach((d, i) => {
+    const pct = Math.round(((i + 1) / decisions.length) * 100);
+    tl.to(papers[i], { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }, i === 0 ? '+=0.2' : '+=0.15')
+      .to('#progress-fill', { width: pct + '%', duration: 0.2 }, '<')
+      .to('#progress-pct', { duration: 0.01, onComplete: () => { document.getElementById('progress-pct').textContent = pct + '%'; } }, '<')
+      .to('#metric-included', { duration: 0.01, onComplete: () => { document.getElementById('metric-included').textContent = d.inc; } }, '<')
+      .to('#metric-excluded', { duration: 0.01, onComplete: () => { document.getElementById('metric-excluded').textContent = d.exc; } }, '<')
+      .to('#metric-maybe', { duration: 0.01, onComplete: () => { document.getElementById('metric-maybe').textContent = d.may; } }, '<')
+      .to('#metric-time', { duration: 0.01, onComplete: () => { document.getElementById('metric-time').textContent = timeTexts[i]; } }, '<');
+  });
+
+  // Hold
+  tl.to({}, { duration: 1.5 })
+    // Transition to results
+    .to('#step-label', { opacity: 0, duration: 0.2 })
+    .add(transitionScene('#scene-3', '#scene-4'));
+
+  return tl;
+}
+
+// ===== Scene 4: Results =====
+function sceneResults() {
+  const tl = gsap.timeline();
+
+  const includeCount = 47;
+  const excludeCount = 412;
+  const maybeCount = 8;
+  const totalCount = includeCount + excludeCount + maybeCount;
+
+  // Donut segments (stacked: exclude first, then include, then maybe)
+  const excludeLen = (excludeCount / totalCount) * CIRCUMFERENCE;
+  const includeLen = (includeCount / totalCount) * CIRCUMFERENCE;
+  const maybeLen = (maybeCount / totalCount) * CIRCUMFERENCE;
+
+  tl.call(() => { setActiveIndicator(4); setStepLabel(4); })
+    .fromTo('.results-scene .scene-title', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
+
+    // Metric cards
+    .fromTo('.results-scene .metric-card', { opacity: 0, y: 15 }, { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' })
+
+    // Count up metrics
+    .to('#result-included', { textContent: includeCount, duration: 1.2, snap: { textContent: 1 }, ease: 'power1.inOut' })
+    .to('#result-excluded', { textContent: excludeCount, duration: 1.2, snap: { textContent: 1 }, ease: 'power1.inOut' }, '<')
+    .to('#result-maybe', { textContent: maybeCount, duration: 1.2, snap: { textContent: 1 }, ease: 'power1.inOut' }, '<')
+    .to('#result-total', { textContent: totalCount, duration: 1.2, snap: { textContent: 1 }, ease: 'power1.inOut' }, '<')
+
+    // Donut chart - each segment is a separate ring
+    // SVG trick: stroke-dasharray = "segLen gap", stroke-dashoffset positions the start
+    // With rotate(-90deg) on SVG, dashoffset 0 = 12 o'clock
+    .to('#donut-container', { opacity: 1, duration: 0.3 }, '-=0.8')
+    .call(() => {
+      const ringExclude = document.getElementById('ring-exclude');
+      const ringInclude = document.getElementById('ring-include');
+      const ringMaybe = document.getElementById('ring-maybe');
+
+      // Each ring: dasharray = "segLen remainder", dashoffset shifts start position
+      // Exclude starts at top (dashoffset = 0)
+      ringExclude.setAttribute('stroke-dasharray', `${excludeLen} ${CIRCUMFERENCE - excludeLen}`);
+      ringExclude.style.strokeDashoffset = String(CIRCUMFERENCE);
+
+      // Include starts after exclude (negative offset rotates clockwise)
+      ringInclude.setAttribute('stroke-dasharray', `${includeLen} ${CIRCUMFERENCE - includeLen}`);
+      ringInclude.style.strokeDashoffset = String(CIRCUMFERENCE);
+
+      // Maybe starts after exclude + include
+      ringMaybe.setAttribute('stroke-dasharray', `${maybeLen} ${CIRCUMFERENCE - maybeLen}`);
+      ringMaybe.style.strokeDashoffset = String(CIRCUMFERENCE);
+    })
+    // Animate exclude ring drawing from hidden to visible (offset 0 = fully drawn from top)
+    .to('#ring-exclude', { attr: { 'stroke-dashoffset': 0 }, duration: 1, ease: 'power2.inOut' }, '-=0.5')
+    // Animate include ring (offset by -excludeLen to start right after exclude segment)
+    .to('#ring-include', { attr: { 'stroke-dashoffset': -excludeLen }, duration: 0.8, ease: 'power2.inOut' }, '-=0.4')
+    // Animate maybe ring (offset by -(excludeLen + includeLen))
+    .to('#ring-maybe', { attr: { 'stroke-dashoffset': -(excludeLen + includeLen) }, duration: 0.5, ease: 'power2.inOut' }, '-=0.3')
+    // Center counter
+    .to('#donut-center', { textContent: totalCount, duration: 1, snap: { textContent: 1 }, ease: 'power1.inOut' }, '-=1.2')
+
+    // Results table
+    .to('#results-table', { opacity: 1, duration: 0.4 }, '-=0.4')
+    .to('.table-row', { opacity: 1, stagger: 0.1, duration: 0.3, ease: 'power2.out' })
+
+    // Export buttons
+    .fromTo('#export-row .btn-export', { opacity: 0, y: 10 }, { opacity: 1, y: 0, stagger: 0.15, duration: 0.3, ease: 'power2.out' })
+
+    // Glow on export
+    .to('#btn-audit', { boxShadow: '0 0 20px rgba(0, 200, 180, 0.4)', duration: 0.4, yoyo: true, repeat: 1 }, '+=0.3')
+
+    // Hold
+    .to({}, { duration: 2.5 })
+
+    // Fade out entire scene
+    .to('#step-label', { opacity: 0, duration: 0.2 })
+    .to('#scene-4', { opacity: 0, duration: 0.5, ease: 'power2.in' });
+
+  return tl;
+}
+
+// ===== Reset state for looping =====
+function resetState() {
+  const tl = gsap.timeline();
+  tl.call(() => {
+    // Reset text contents
+    document.getElementById('license-text').textContent = '';
+    document.getElementById('protocol-text').textContent = '';
+    document.getElementById('sidebar-license').textContent = 'Free Trial';
+    document.getElementById('sidebar-protocol').textContent = 'Not configured';
+    document.getElementById('sidebar-protocol').style.opacity = '0.4';
+    document.getElementById('sidebar-review').textContent = '\u2014';
+    document.getElementById('sidebar-review').style.opacity = '0.4';
+
+    // Remove typing cursors
+    hideCursor('license-input');
+    hideCursor('protocol-input');
+
+    // Reset step label
+    gsap.set('#step-label', { opacity: 0 });
+
+    // Reset metrics
+    ['metric-included', 'metric-excluded', 'metric-maybe'].forEach(id => {
+      document.getElementById(id).textContent = '0';
+    });
+    document.getElementById('metric-time').textContent = '0:00';
+    document.getElementById('progress-pct').textContent = '0%';
+    document.getElementById('progress-fill').style.width = '0%';
+
+    // Reset results
+    ['result-included', 'result-excluded', 'result-maybe', 'result-total', 'donut-center'].forEach(id => {
+      document.getElementById(id).textContent = '0';
+    });
+
+    // Reset donut rings
+    ['ring-exclude', 'ring-include', 'ring-maybe'].forEach(id => {
+      const ring = document.getElementById(id);
+      ring.setAttribute('stroke-dasharray', `${CIRCUMFERENCE}`);
+      ring.setAttribute('stroke-dashoffset', String(CIRCUMFERENCE));
+      ring.style.strokeDashoffset = '';
+      gsap.set(ring, { clearProps: 'all' });
+    });
+
+    // Reset input styles
+    gsap.set('#license-input', { borderColor: 'rgba(240, 237, 230, 0.1)', boxShadow: 'none' });
+    gsap.set('#protocol-input', { borderColor: 'rgba(240, 237, 230, 0.1)', boxShadow: 'none' });
+    gsap.set('#license-success', { opacity: 0 });
+
+    // Reset screening header
+    gsap.set('#screening-header', { opacity: 1, y: 0 });
+
+    // Reset paper items
+    gsap.set('.paper-item', { opacity: 0, x: -20 });
+
+    // Reset criteria
+    gsap.set('.criteria-column', { opacity: 0 });
+    gsap.set('.criteria-item', { opacity: 0, x: -10 });
+    gsap.set('#picos-section', { opacity: 0 });
+
+    // Reset pricing cards
+    gsap.set('.pricing-card', { opacity: 0 });
+
+    // Reset results table
+    gsap.set('#results-table', { opacity: 0 });
+    gsap.set('.table-row', { opacity: 0 });
+    gsap.set('#donut-container', { opacity: 0 });
+    gsap.set('#export-row .btn-export', { opacity: 0 });
+
+    // Reset scene overlay
+    gsap.set('#scene-overlay', { opacity: 0 });
+
+    // Reset all scenes
+    gsap.set('.scene', { opacity: 0 });
+
+    // Clear all inline styles from animated elements to prevent loop glitches
+    document.querySelectorAll('.scene-title, .welcome-text, .progress-section, #screening-header').forEach(el => {
+      gsap.set(el, { clearProps: 'all' });
+    });
+    gsap.set('.screening-scene .metric-card', { clearProps: 'all' });
+    gsap.set('.results-scene .metric-card', { clearProps: 'all' });
+    gsap.set('#export-row .btn-export', { clearProps: 'all' });
+    gsap.set('#price-free', { clearProps: 'all' });
+    gsap.set('#price-single', { clearProps: 'all' });
+    gsap.set('#confirm-protocol-btn', { clearProps: 'boxShadow' });
+    gsap.set('#btn-audit', { clearProps: 'boxShadow' });
+  })
+  .to({}, { duration: 1 }); // Brief pause between loops
+
+  return tl;
+}
+
+// ===== Master Timeline =====
+const master = gsap.timeline({ repeat: -1, repeatDelay: 1 });
+
+master
+  .add(resetState())
+  .add(sceneLicense())
+  .add(sceneProtocol(), '+=0.2')
+  .add(sceneScreening(), '+=0.2')
+  .add(sceneResults(), '+=0.2');
+</script>
+</body>
+</html>

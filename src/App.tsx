@@ -172,96 +172,17 @@ function Hero() {
           </FadeIn>
         </div>
 
-        {/* App UI Mockup */}
+        {/* Animated Product Demo */}
         <FadeIn delay={1.4} duration={0.8} blur>
-          <div className="app-mockup max-w-3xl mx-auto">
-            {/* Browser chrome */}
-            <div className="app-mockup__bar">
-              <span className="terminal-dot" style={{ background: '#ff5f57' }} />
-              <span className="terminal-dot" style={{ background: '#febc2e' }} />
-              <span className="terminal-dot" style={{ background: '#28c840' }} />
-              <span className="app-mockup__url">localhost:8501</span>
-            </div>
-            <div className="app-mockup__body">
-              {/* Sidebar */}
-              <div className="app-mockup__sidebar">
-                <div className="app-mockup__sidebar-brand">
-                  <span className="w-5 h-5 rounded bg-[var(--color-teal)] flex items-center justify-center text-[var(--color-navy)] font-bold text-[8px]">EF</span>
-                  <span className="text-[var(--color-cream)] text-xs font-semibold">EvidenceFlow</span>
-                </div>
-                <div className="app-mockup__sidebar-section">
-                  <div className="app-mockup__sidebar-label">License</div>
-                  <div className="app-mockup__sidebar-badge">Single Review</div>
-                </div>
-                <div className="app-mockup__sidebar-section">
-                  <div className="app-mockup__sidebar-label">Protocol</div>
-                  <div className="text-[10px] text-[var(--color-cream-muted)]">review_protocol.json</div>
-                </div>
-                <div className="app-mockup__sidebar-section">
-                  <div className="app-mockup__sidebar-label">Papers</div>
-                  <div className="text-[10px] text-[var(--color-cream-muted)]">6,000 total</div>
-                </div>
-                <div className="mt-auto pt-3">
-                  <div className="app-mockup__sidebar-btn">Start Screening</div>
-                </div>
-              </div>
-              {/* Main content */}
-              <div className="app-mockup__main">
-                <div className="text-xs font-semibold text-[var(--color-cream)] mb-2">Screening Progress</div>
-                {/* Progress bar */}
-                <div className="app-mockup__progress">
-                  <div className="app-mockup__progress-fill" style={{ width: '100%' }} />
-                </div>
-                <div className="text-[10px] text-[var(--color-cream-muted)] mb-3">Batch 60/60 complete</div>
-                {/* Metrics row */}
-                <div className="app-mockup__metrics">
-                  <div className="app-mockup__metric">
-                    <div className="app-mockup__metric-value text-[var(--color-teal)]">412</div>
-                    <div className="app-mockup__metric-label">Included</div>
-                  </div>
-                  <div className="app-mockup__metric">
-                    <div className="app-mockup__metric-value">5,396</div>
-                    <div className="app-mockup__metric-label">Excluded</div>
-                  </div>
-                  <div className="app-mockup__metric">
-                    <div className="app-mockup__metric-value" style={{ color: '#FFD166' }}>192</div>
-                    <div className="app-mockup__metric-label">Maybe</div>
-                  </div>
-                  <div className="app-mockup__metric">
-                    <div className="app-mockup__metric-value">58m 14s</div>
-                    <div className="app-mockup__metric-label">Duration</div>
-                  </div>
-                </div>
-                {/* Results preview */}
-                <div className="text-[10px] font-medium text-[var(--color-cream)] mt-3 mb-1.5">Recent Decisions</div>
-                <div className="app-mockup__table">
-                  <div className="app-mockup__row app-mockup__row--header">
-                    <span className="flex-1">Title</span>
-                    <span className="w-14 text-center">Decision</span>
-                  </div>
-                  <div className="app-mockup__row">
-                    <span className="flex-1 truncate">Effects of mindfulness-based intervention on...</span>
-                    <span className="app-mockup__badge app-mockup__badge--yes">Yes</span>
-                  </div>
-                  <div className="app-mockup__row">
-                    <span className="flex-1 truncate">A systematic review of pharmacological...</span>
-                    <span className="app-mockup__badge app-mockup__badge--no">No</span>
-                  </div>
-                  <div className="app-mockup__row">
-                    <span className="flex-1 truncate">Machine learning approaches for predicting...</span>
-                    <span className="app-mockup__badge app-mockup__badge--no">No</span>
-                  </div>
-                  <div className="app-mockup__row">
-                    <span className="flex-1 truncate">Cognitive behavioral therapy outcomes in...</span>
-                    <span className="app-mockup__badge app-mockup__badge--yes">Yes</span>
-                  </div>
-                  <div className="app-mockup__row">
-                    <span className="flex-1 truncate">Cross-sectional analysis of dietary patterns...</span>
-                    <span className="app-mockup__badge app-mockup__badge--maybe">Maybe</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="max-w-[960px] mx-auto rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-[rgba(240,237,230,0.08)]">
+            <iframe
+              src={import.meta.env.BASE_URL + 'demo-animation.html'}
+              width="960"
+              height="600"
+              style={{ border: 'none', borderRadius: '12px', maxWidth: '100%', display: 'block' }}
+              loading="lazy"
+              title="EvidenceFlow product demo"
+            />
           </div>
         </FadeIn>
 
