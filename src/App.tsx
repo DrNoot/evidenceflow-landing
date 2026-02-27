@@ -793,13 +793,13 @@ export default function App() {
       <div className="glass-divider" />
       <Problem />
       <div className="glass-divider" />
+      <FounderStory />
+      <div className="glass-divider" />
       <HowItWorks />
       <div className="glass-divider" />
       <Features />
       <div className="glass-divider" />
       <Benchmarks />
-      <div className="glass-divider" />
-      <FounderStory />
       <div className="glass-divider" />
       <Personas />
       <div className="glass-divider" />
