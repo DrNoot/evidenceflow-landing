@@ -174,10 +174,11 @@ function Hero() {
 
         {/* Animated Product Demo */}
         <FadeIn delay={1.4} duration={0.8} blur>
-          <div className="max-w-[960px] mx-auto rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-[rgba(240,237,230,0.08)]">
+          <div className="max-w-[960px] mx-auto rounded-xl overflow-hidden shadow-2xl shadow-black/40 border border-[rgba(240,237,230,0.08)]" style={{ position: 'relative', width: '100%', paddingBottom: 'min(600px, 62.5%)' }}>
             <iframe
               src={import.meta.env.BASE_URL + 'demo-animation.html'}
-              style={{ width: '100%', aspectRatio: '960 / 600', border: 'none', borderRadius: '12px', display: 'block' }}
+              scrolling="no"
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', borderRadius: '12px' }}
               loading="lazy"
               title="EvidenceFlow product demo"
             />
